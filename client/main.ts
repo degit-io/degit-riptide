@@ -1,5 +1,12 @@
 import {logger} from "./src/log"
-import {establishConnection, getAccount, getProgram, getTransaction} from "./src/utils"
+import {
+  createDataAccount,
+  establishConnection,
+  getAccount,
+  getProgram,
+  getTransaction,
+  sendTransaction
+} from "./src/utils"
 import {sendAndConfirmTransaction} from "@solana/web3.js"
 
 const main = async (): Promise<void> => {
@@ -10,19 +17,27 @@ const main = async (): Promise<void> => {
     account,
     programId
   )
-
-  let balance = await connection.getBalance(account.publicKey)
-  logger.info("Balance before transaction : ", balance)
-
-  const result = await sendAndConfirmTransaction(
-    connection,
-    transaction,
-    [account],
+  const {dataPubKey, dataToSend} = await createDataAccount(
+    account,
+    programId,
+    connection
   )
 
-  balance = await connection.getBalance(account.publicKey)
-  logger.info("Balance after transaction : ", balance)
-  logger.info("Result", result)
+  logger.info("Sending to", dataPubKey.toBase58())
+  await sendTransaction(
+    account,
+    dataPubKey,
+    programId,
+    connection,
+    dataToSend
+  )
+
+  // const result = await sendAndConfirmTransaction(
+  //   connection,
+  //   transaction,
+  //   [account],
+  // )
+  //
 }
 
 logger.info("run begins")
