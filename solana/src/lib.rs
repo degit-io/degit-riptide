@@ -12,10 +12,17 @@ entrypoint!(process_instruction);
 
 pub fn process_instruction(
     program_id: &Pubkey,
-    _accounts: &[AccountInfo],
-    _instruction_data: &[u8],
+    accounts: &[AccountInfo],
+    instruction_data: &[u8],
 ) -> ProgramResult {
     let msg = format!("Program working fine - {}", program_id);
     msg!(&msg);
+
+    let accounts_iter = &mut accounts.iter();
+    let account = next_account_info(accounts_iter)?;
+
+    let data = &account.data.borrow();
+    msg!(data);
+
     Ok(())
 }
