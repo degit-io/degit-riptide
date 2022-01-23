@@ -2,7 +2,20 @@
 name = "degit"
 version = "0.1.0"
 edition = "2021"
+description = "Decentralized git repositories"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+no-entrypoint = []
 
 [dependencies]
+borsh = "0.9.1"
+borsh-derive = "0.9.1"
+solana-program = "=1.7.9"
+
+[dev-dependencies]
+solana-program-test = "=1.7.9"
+solana-sdk = "=1.7.9"
+
+[lib]
+name = "degit"
+crate-type = ["cdylib", "lib"]
