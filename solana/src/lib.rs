@@ -25,6 +25,8 @@ pub fn process_instruction(
 
   let accounts_iter = &mut accounts.iter();
   let account = next_account_info(accounts_iter)?;
+  msg!("Account owner: {:?}", account.owner);
+
   let msg = account.key.to_string();
   msg!(&msg);
 
