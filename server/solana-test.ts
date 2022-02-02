@@ -9,7 +9,7 @@ import {
 } from "./src/utils"
 import {sendAndConfirmTransaction} from "@solana/web3.js"
 
-const main = async (): Promise<void> => {
+const solanaTest = async (): Promise<void> => {
   const connection = await establishConnection()
   const account = await getAccount()
   const programId = await getProgram(connection)
@@ -41,7 +41,7 @@ const main = async (): Promise<void> => {
 }
 
 logger.info("run begins")
-main().then(
+solanaTest().then(
   _ => {
     logger.info("run succeeds")
     process.exit(0)
