@@ -67,6 +67,7 @@ export function serviceRespond(
   res.write(packSideband("# service=git-" + service + "\n"))
   res.write("0000")
 
+  // Check if it's Windows
   const isWin = /^win/.test(process.platform)
 
   const cmd = isWin
