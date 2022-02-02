@@ -6,7 +6,7 @@ import {
   getProgram,
   getTransaction,
   sendTransaction
-} from "./src/utils"
+} from "./src/solana"
 import {sendAndConfirmTransaction} from "@solana/web3.js"
 
 const solanaTest = async (): Promise<void> => {

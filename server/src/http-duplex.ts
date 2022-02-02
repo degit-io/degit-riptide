@@ -1,21 +1,25 @@
-import http from 'http';
-import EventEmitter from 'events';
+import http from "http"
+import EventEmitter from "events"
 
 export class HttpDuplex extends EventEmitter {
   setHeader(arg0: string, arg1: string) {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.")
   }
+
   end(reason?: any) {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.")
   }
+
   destroy() {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.")
   }
+
   accept() {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.")
   }
+
   reject(code: number, msg: string) {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.")
   }
 
   /**
@@ -26,7 +30,7 @@ export class HttpDuplex extends EventEmitter {
    * @see {@link https://nodejs.org/api/http.html#http_class_http_incomingmessage|http.IncomingMessage}
    *
    */
-  req: http.IncomingMessage;
+  req: http.IncomingMessage
 
   /**
    * Created http.server. Passed as the second parameter to the 'request' event.
@@ -34,10 +38,10 @@ export class HttpDuplex extends EventEmitter {
    * @see {@link https://nodejs.org/api/http.html#http_event_request|request}
    * @see {@link https://nodejs.org/api/http.html#http_class_http_serverresponse|http.ServerResponse}
    */
-  res: http.ServerResponse;
-  cwd: string | undefined;
-  repo: string | undefined;
-  exists: boolean | undefined;
+  res: http.ServerResponse
+  cwd: string | undefined
+  repo: string | undefined
+  exists: boolean | undefined
 
   /**
    * Constructs a proxy object over input and output resulting in a unified stream.
@@ -47,32 +51,32 @@ export class HttpDuplex extends EventEmitter {
    * @see {@link https://nodejs.org/api/http.html#http_class_http_serverresponse|http.ServerResponse}
    * @example <caption> A simple example is shown below </caption>
 
-    ```js
-    http.createServer(function (req, res) {
+   ```js
+   http.createServer(function (req, res) {
         var dup = new HttpDuplex(req, res);
         res.end("Request: " + req.method + " " + req.url);
     }).listen(80);
-    ```
+   ```
    */
   constructor(input: http.IncomingMessage, output: http.ServerResponse) {
-    super();
+    super()
 
-    this.req = input;
+    this.req = input
     this.res = output;
 
     // request / input proxy events
-    ['data', 'end', 'error', 'close'].forEach((name) => {
-      this.req.on(name, this.emit.bind(this, name));
+    ["data", "end", "error", "close"].forEach((name) => {
+      this.req.on(name, this.emit.bind(this, name))
     });
 
     // respone / output proxy events
-    ['error', 'drain'].forEach((name) => {
-      this.res.on(name, this.emit.bind(this, name));
-    });
+    ["error", "drain"].forEach((name) => {
+      this.res.on(name, this.emit.bind(this, name))
+    })
   }
 
   get complete() {
-    return this.req.complete;
+    return this.req.complete
   }
 
   /**
@@ -81,7 +85,7 @@ export class HttpDuplex extends EventEmitter {
    * @see {@link https://nodejs.org/api/http.html#http_request_socket|request.Socket}
    */
   get connection() {
-    return this.req.connection;
+    return this.req.connection
   }
 
   /**
@@ -90,7 +94,7 @@ export class HttpDuplex extends EventEmitter {
    * @see {@link https://nodejs.org/api/http.html#http_message_headers|message.headers}
    */
   get headers() {
-    return this.req.headers;
+    return this.req.headers
   }
 
   /**
@@ -99,7 +103,7 @@ export class HttpDuplex extends EventEmitter {
    * @readonly
    */
   get httpVersion() {
-    return this.req.httpVersion;
+    return this.req.httpVersion
   }
 
   /**
@@ -108,7 +112,7 @@ export class HttpDuplex extends EventEmitter {
    * @readonly
    */
   get httpVersionMajor() {
-    return this.req.httpVersionMajor;
+    return this.req.httpVersionMajor
   }
 
   /**
@@ -117,7 +121,7 @@ export class HttpDuplex extends EventEmitter {
    * @readonly
    */
   get httpVersionMinor() {
-    return this.req.httpVersionMinor;
+    return this.req.httpVersionMinor
   }
 
   /**
@@ -128,7 +132,7 @@ export class HttpDuplex extends EventEmitter {
    * @readonly
    */
   get method() {
-    return this.req.method;
+    return this.req.method
   }
 
   /**
@@ -136,7 +140,7 @@ export class HttpDuplex extends EventEmitter {
    * @readonly
    */
   get readable() {
-    return this.req.readable;
+    return this.req.readable
   }
 
   /**
@@ -145,7 +149,7 @@ export class HttpDuplex extends EventEmitter {
    * @readonly
    */
   get socket() {
-    return this.req.socket;
+    return this.req.socket
   }
 
   /**
@@ -154,11 +158,11 @@ export class HttpDuplex extends EventEmitter {
    * @example request.statusCode = 404;
    */
   get statusCode() {
-    return this.res.statusCode;
+    return this.res.statusCode
   }
 
   set statusCode(val) {
-    this.res.statusCode = val;
+    this.res.statusCode = val
   }
 
   /**
@@ -168,11 +172,11 @@ export class HttpDuplex extends EventEmitter {
    * @example request.statusMessage = 'Document Not found';
    */
   get statusMessage() {
-    return this.res.statusMessage;
+    return this.res.statusMessage
   }
 
   set statusMessage(val) {
-    this.res.statusMessage = val;
+    this.res.statusMessage = val
   }
 
   /**
@@ -187,7 +191,7 @@ export class HttpDuplex extends EventEmitter {
    * @see {@link https://nodejs.org/api/http.html#http_response_addtrailers_headers|response.addTrailers}
    */
   get trailers() {
-    return this.req.trailers;
+    return this.req.trailers
   }
 
   /**
@@ -199,12 +203,12 @@ export class HttpDuplex extends EventEmitter {
    * @readonly
    */
   get url() {
-    return this.req.url;
+    return this.req.url
   }
 
   // output / response wrapping
   get writable() {
-    return this.res.writable;
+    return this.res.writable
   }
 
   /**
@@ -221,8 +225,8 @@ export class HttpDuplex extends EventEmitter {
    * response.end(content);
    */
   writeHead(statusCode: number, statusMessage: string, headers: string[]) {
-    this.res.writeHead(statusCode, statusMessage, headers);
-    return this;
+    this.res.writeHead(statusCode, statusMessage, headers)
+    return this
   }
 
   /**
@@ -236,8 +240,8 @@ export class HttpDuplex extends EventEmitter {
    * request.uncork();
    */
   cork() {
-    this.res.socket?.cork();
-    return this;
+    this.res.socket?.cork()
+    return this
   }
 
   /**
@@ -246,42 +250,42 @@ export class HttpDuplex extends EventEmitter {
    * @see {@link https://nodejs.org/api/stream.html#stream_writable_uncork|stream.Writeable.uncork}
    */
   uncork() {
-    this.res.socket?.uncork();
-    return this;
+    this.res.socket?.uncork()
+    return this
   }
 }
 
 // proxy request methods
-['pause', 'resume', 'setEncoding'].forEach(function (name) {
+["pause", "resume", "setEncoding"].forEach(function (name) {
   (HttpDuplex.prototype as any)[name] = function () {
     // eslint-disable-next-line prefer-rest-params
-    return (this.req as any)[name].apply(this.req, Array.from(arguments));
-  };
+    return (this.req as any)[name].apply(this.req, Array.from(arguments))
+  }
 });
 
 // proxy respone methods
 [
-  'setDefaultEncoding',
-  'write',
-  'end',
-  'flush',
-  'writeHeader',
-  'writeContinue',
-  'setHeader',
-  'getHeader',
-  'removeHeader',
-  'addTrailers',
+  "setDefaultEncoding",
+  "write",
+  "end",
+  "flush",
+  "writeHeader",
+  "writeContinue",
+  "setHeader",
+  "getHeader",
+  "removeHeader",
+  "addTrailers",
 ].forEach(function (name) {
   (HttpDuplex.prototype as any)[name] = function () {
     // eslint-disable-next-line prefer-rest-params
-    return (this.res as any)[name].apply(this.res, Array.from(arguments));
-  };
-});
+    return (this.res as any)[name].apply(this.res, Array.from(arguments))
+  }
+})
 
 /**
  * Destroys object and it's bound streams
  */
 HttpDuplex.prototype.destroy = function () {
-  this.req.destroy();
-  this.res.destroy();
-};
+  this.req.destroy()
+  this.res.destroy()
+}

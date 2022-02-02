@@ -1,14 +1,14 @@
-import fs from 'fs';
+import fs from "fs"
 
-import path from 'path';
-import http, { ServerOptions } from 'http';
-import https from 'https';
-import url from 'url';
-import qs from 'querystring';
-import { HttpDuplex } from './http-duplex';
+import path from "path"
+import http, {ServerOptions} from "http"
+import https from "https"
+import url from "url"
+import qs from "querystring"
+import {HttpDuplex} from "./http-duplex"
 
-import { spawn } from 'child_process';
-import { EventEmitter } from 'events';
+import {spawn} from "child_process"
+import {EventEmitter} from "events"
 
 import {
   parseGitName,
@@ -16,13 +16,13 @@ import {
   infoResponse,
   basicAuth,
   noCache,
-} from './util';
-import { ServiceString } from './types';
+} from "./util"
+import {ServiceString} from "./types"
 
-const services = ['upload-pack', 'receive-pack'];
+const services = ["upload-pack", "receive-pack"]
 
 interface GitServerOptions extends ServerOptions {
-  type: 'http' | 'https';
+  type: "http" | "https";
 }
 
 export interface GitOptions {
@@ -97,7 +97,7 @@ export interface GitEvents {
    * Exactly one listener must call `push.accept()` or `push.reject()`. If there are
    * no listeners, `push.accept()` is called automatically.
    **/
-  on(event: 'push', listener: (push: PushData) => void): this;
+  on(event: "push", listener: (push: PushData) => void): this;
 
   /**
    * @example
@@ -107,7 +107,7 @@ export interface GitEvents {
    * Exactly one listener must call `tag.accept()` or `tag.reject()`. If there are
    * No listeners, `tag.accept()` is called automatically.
    **/
-  on(event: 'tag', listener: (tag: TagData) => void): this;
+  on(event: "tag", listener: (tag: TagData) => void): this;
 
   /**
    * @example
@@ -119,7 +119,7 @@ export interface GitEvents {
    * Exactly one listener must call `fetch.accept()` or `fetch.reject()`. If there are
    * no listeners, `fetch.accept()` is called automatically.
    **/
-  on(event: 'fetch', listener: (fetch: FetchData) => void): this;
+  on(event: "fetch", listener: (fetch: FetchData) => void): this;
 
   /**
    * @example
@@ -130,7 +130,7 @@ export interface GitEvents {
    * Exactly one listener must call `info.accept()` or `info.reject()`. If there are
    * no listeners, `info.accept()` is called automatically.
    **/
-  on(event: 'info', listener: (info: InfoData) => void): this;
+  on(event: "info", listener: (info: InfoData) => void): this;
 
   /**
    * @example
@@ -142,21 +142,22 @@ export interface GitEvents {
    * no listeners, `head.accept()` is called automatically.
    *
    **/
-  on(event: 'head', listener: (head: HeadData) => void): this;
+  on(event: "head", listener: (head: HeadData) => void): this;
 }
+
 export class Git extends EventEmitter implements GitEvents {
-  dirMap: (dir?: string) => string;
+  dirMap: (dir?: string) => string
 
   authenticate:
     | ((
-        options: GitAuthenticateOptions,
-        callback: (error?: Error) => void | undefined
-      ) => void | Promise<Error | undefined | void> | undefined)
-    | undefined;
+    options: GitAuthenticateOptions,
+    callback: (error?: Error) => void | undefined
+  ) => void | Promise<Error | undefined | void> | undefined)
+    | undefined
 
-  autoCreate: boolean;
-  checkout: boolean | undefined;
-  server: https.Server | http.Server | undefined;
+  autoCreate: boolean
+  checkout: boolean | undefined
+  server: https.Server | http.Server | undefined
 
   /**
    *
@@ -167,12 +168,12 @@ export class Git extends EventEmitter implements GitEvents {
    disable that behavior with `options.autoCreate = true`
    * @param  options.authenticate - a function that has the following arguments ({ type, repo, username, password, headers }, next) and will be called when a request comes through if set
    *
-     authenticate: ({ type, repo, username, password, headers }, next) => {
+   authenticate: ({ type, repo, username, password, headers }, next) => {
        console.log(type, repo, username, password);
        next();
      }
-     // alternatively you can also pass authenticate a promise
-     authenticate: ({ type, repo, username, password, headers }, next) => {
+   // alternatively you can also pass authenticate a promise
+   authenticate: ({ type, repo, username, password, headers }, next) => {
        console.log(type, repo, username, password);
        return new Promise((resolve, reject) => {
         if(username === 'foo') {
@@ -182,30 +183,31 @@ export class Git extends EventEmitter implements GitEvents {
        });
      }
    * @param  options.checkout - If `opts.checkout` is true, create and expected checked-out repos instead of bare repos
-  */
+   */
   constructor(
     repoDir: string | ((dir?: string) => string),
     options: GitOptions = {}
   ) {
-    super();
+    super()
 
-    if (typeof repoDir === 'function') {
-      this.dirMap = repoDir;
+    if (typeof repoDir === "function") {
+      this.dirMap = repoDir
     } else {
       this.dirMap = (dir?: string): string => {
         return path.normalize(
           (dir ? path.join(repoDir, dir) : repoDir) as string
-        );
-      };
+        )
+      }
     }
 
     if (options.authenticate) {
-      this.authenticate = options.authenticate;
+      this.authenticate = options.authenticate
     }
 
-    this.autoCreate = options.autoCreate === false ? false : true;
-    this.checkout = options.checkout;
+    this.autoCreate = options.autoCreate === false ? false : true
+    this.checkout = options.checkout
   }
+
   /**
    * Get a list of all the repositories
    * @param  {Function} callback function to be called when repositories have been found `function(error, repos)`
@@ -217,36 +219,39 @@ export class Git extends EventEmitter implements GitEvents {
   ): Promise<string[]> | void {
     const execf = (res: (repos: string[]) => void, rej: (err: Error) => void) =>
       fs.readdir(this.dirMap(), (error, results) => {
-        if (error) return rej(error);
+        if (error) return rej(error)
         const repos = results.filter((r) => {
-          return r.substring(r.length - 3, r.length) == 'git';
-        }, []);
+          return r.substring(r.length - 3, r.length) == "git"
+        }, [])
 
-        res(repos);
-      });
+        res(repos)
+      })
     if (callback)
       return execf(
         (repos) => callback(void 0, repos),
         (err) => callback(err, void 0)
-      );
-    else return new Promise<string[]>((res, rej) => execf(res, rej));
+      )
+    else return new Promise<string[]>((res, rej) => execf(res, rej))
   }
+
   /**
    * Find out whether `repoName` exists in the callback `cb(exists)`.
    * @param  repo - name of the repo
    * @param  callback - function to be called when finished
    */
   exists(repo: string): boolean {
-    return fs.existsSync(this.dirMap(repo));
+    return fs.existsSync(this.dirMap(repo))
   }
+
   /**
    * Create a subdirectory `dir` in the repo dir with a callback.
    * @param  dir - directory name
    * @param  callback  - callback to be called when finished
    */
   mkdir(dir: string) {
-    fs.mkdirSync(path.dirname(dir), { recursive: true });
+    fs.mkdirSync(path.dirname(dir), {recursive: true})
   }
+
   /**
    * Create a new bare repository `repoName` in the instance repository directory.
    * @param  repo - the name of the repo
@@ -254,59 +259,60 @@ export class Git extends EventEmitter implements GitEvents {
    */
   create(repo: string, callback: (error?: Error) => void) {
     function next(self: Git) {
-      let ps;
-      let _error = '';
+      let ps
+      let _error = ""
 
-      const dir = self.dirMap(repo);
+      const dir = self.dirMap(repo)
 
       if (self.checkout) {
-        ps = spawn('git', ['init', dir]);
+        ps = spawn("git", ["init", dir])
       } else {
-        ps = spawn('git', ['init', '--bare', dir]);
+        ps = spawn("git", ["init", "--bare", dir])
       }
 
-      ps.stderr.on('data', function (chunk: string) {
-        _error += chunk;
-      });
+      ps.stderr.on("data", function (chunk: string) {
+        _error += chunk
+      })
 
-      ps.on('exit', (code) => {
+      ps.on("exit", (code) => {
         if (!callback) {
-          return;
+          return
         } else if (code) {
-          callback(new Error(_error));
+          callback(new Error(_error))
         } else {
-          callback();
+          callback()
         }
-      });
+      })
     }
 
-    if (typeof callback !== 'function')
+    if (typeof callback !== "function")
       callback = () => {
-        return;
-      };
+        return
+      }
 
-    if (!/\.git$/.test(repo)) repo += '.git';
+    if (!/\.git$/.test(repo)) repo += ".git"
 
-    const exists = this.exists(repo);
+    const exists = this.exists(repo)
 
     if (!exists) {
-      this.mkdir(repo);
+      this.mkdir(repo)
     }
 
-    next(this);
+    next(this)
   }
+
   /**
    * returns the typeof service being process. This will respond with either fetch or push.
    * @param  service - the service type
    */
   getType(service: string): string {
     switch (service) {
-      case 'upload-pack':
-        return 'fetch';
-      case 'receive-pack':
-        return 'push';
+      case "upload-pack":
+        return "fetch"
+      case "receive-pack":
+        return "push"
       default:
-        return 'unknown';
+        return "unknown"
     }
   }
 
@@ -317,155 +323,155 @@ export class Git extends EventEmitter implements GitEvents {
    */
   handle(req: http.IncomingMessage, res: http.ServerResponse) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
+    const self = this
 
     const handlers = [
       (req: http.IncomingMessage, res: http.ServerResponse) => {
-        if (req.method !== 'GET') return false;
+        if (req.method !== "GET") return false
 
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const u = url.parse(req?.url || '');
-        const m = u.pathname?.match(/\/(.+)\/info\/refs$/);
-        if (!m) return false;
-        if (/\.\./.test(m[1])) return false;
+        const u = url.parse(req?.url || "")
+        const m = u.pathname?.match(/\/(.+)\/info\/refs$/)
+        if (!m) return false
+        if (/\.\./.test(m[1])) return false
 
-        const repo = m[1];
-        const params = qs.parse(u?.query || '');
-        if (!params.service || typeof params.service !== 'string') {
-          res.statusCode = 400;
-          res.end('service parameter required');
-          return;
+        const repo = m[1]
+        const params = qs.parse(u?.query || "")
+        if (!params.service || typeof params.service !== "string") {
+          res.statusCode = 400
+          res.end("service parameter required")
+          return
         }
 
-        const service = params.service.replace(/^git-/, '');
+        const service = params.service.replace(/^git-/, "")
 
         if (services.indexOf(service) < 0) {
-          res.statusCode = 405;
-          res.end('service not available');
-          return;
+          res.statusCode = 405
+          res.end("service not available")
+          return
         }
 
-        const repoName = parseGitName(m[1]);
+        const repoName = parseGitName(m[1])
         const next = (error?: Error | void) => {
           if (error) {
-            res.setHeader('Content-Type', 'text/plain');
+            res.setHeader("Content-Type", "text/plain")
             res.setHeader(
-              'WWW-Authenticate',
-              'Basic realm="authorization needed"'
-            );
-            res.writeHead(401);
-            res.end(typeof error === 'string' ? error : error.toString());
-            return;
+              "WWW-Authenticate",
+              "Basic realm=\"authorization needed\""
+            )
+            res.writeHead(401)
+            res.end(typeof error === "string" ? error : error.toString())
+            return
           } else {
-            return infoResponse(this, repo, service as ServiceString, req, res);
+            return infoResponse(this, repo, service as ServiceString, req, res)
           }
-        };
+        }
 
         // check if the repo is authenticated
         if (this.authenticate) {
-          const type = this.getType(service);
-          const headers = req.headers;
+          const type = this.getType(service)
+          const headers = req.headers
           const user = (
             callback?: (username?: string, password?: string) => void
           ) =>
             callback
               ? basicAuth(req, res, callback)
               : new Promise<[string | undefined, string | undefined]>(
-                  (resolve) => basicAuth(req, res, (u, p) => resolve([u, p]))
-                );
+                (resolve) => basicAuth(req, res, (u, p) => resolve([u, p]))
+              )
 
           const promise = this.authenticate(
             {
               type,
               repo: repoName,
-              user: user as unknown as GitAuthenticateOptions['user'],
+              user: user as unknown as GitAuthenticateOptions["user"],
               headers,
             },
             (error?: Error) => {
-              return next(error);
+              return next(error)
             }
-          );
+          )
 
           if (promise instanceof Promise) {
-            return promise.then(next).catch(next);
+            return promise.then(next).catch(next)
           }
         } else {
-          return next();
+          return next()
         }
       },
       (req: http.IncomingMessage, res: http.ServerResponse) => {
-        if (req.method !== 'GET') return false;
+        if (req.method !== "GET") return false
 
-        const u = url.parse(req.url || '');
-        const m = u.pathname?.match(/^\/(.+)\/HEAD$/);
-        if (!m) return false;
-        if (/\.\./.test(m[1])) return false;
+        const u = url.parse(req.url || "")
+        const m = u.pathname?.match(/^\/(.+)\/HEAD$/)
+        if (!m) return false
+        if (/\.\./.test(m[1])) return false
 
-        const repo = m[1];
+        const repo = m[1]
 
         const next = () => {
-          const file = this.dirMap(path.join(m[1], 'HEAD'));
-          const exists = this.exists(file);
+          const file = this.dirMap(path.join(m[1], "HEAD"))
+          const exists = this.exists(file)
 
           if (exists) {
-            fs.createReadStream(file).pipe(res);
+            fs.createReadStream(file).pipe(res)
           } else {
-            res.statusCode = 404;
-            res.end('not found');
+            res.statusCode = 404
+            res.end("not found")
           }
-        };
+        }
 
-        const exists = this.exists(repo);
-        const anyListeners = self.listeners('head').length > 0;
-        const dup = new HttpDuplex(req, res);
-        dup.exists = exists;
-        dup.repo = repo;
-        dup.cwd = this.dirMap(repo);
+        const exists = this.exists(repo)
+        const anyListeners = self.listeners("head").length > 0
+        const dup = new HttpDuplex(req, res)
+        dup.exists = exists
+        dup.repo = repo
+        dup.cwd = this.dirMap(repo)
 
-        dup.accept = dup.emit.bind(dup, 'accept');
-        dup.reject = dup.emit.bind(dup, 'reject');
+        dup.accept = dup.emit.bind(dup, "accept")
+        dup.reject = dup.emit.bind(dup, "reject")
 
-        dup.once('reject', (code: number) => {
-          dup.statusCode = code || 500;
-          dup.end();
-        });
+        dup.once("reject", (code: number) => {
+          dup.statusCode = code || 500
+          dup.end()
+        })
 
         if (!exists && self.autoCreate) {
-          dup.once('accept', (dir: string) => {
-            self.create(dir || repo, next);
-          });
-          self.emit('head', dup);
-          if (!anyListeners) dup.accept();
+          dup.once("accept", (dir: string) => {
+            self.create(dir || repo, next)
+          })
+          self.emit("head", dup)
+          if (!anyListeners) dup.accept()
         } else if (!exists) {
-          res.statusCode = 404;
-          res.setHeader('content-type', 'text/plain');
-          res.end('repository not found');
+          res.statusCode = 404
+          res.setHeader("content-type", "text/plain")
+          res.end("repository not found")
         } else {
-          dup.once('accept', next);
-          self.emit('head', dup);
-          if (!anyListeners) dup.accept();
+          dup.once("accept", next)
+          self.emit("head", dup)
+          if (!anyListeners) dup.accept()
         }
       },
       (req: http.IncomingMessage, res: http.ServerResponse) => {
-        if (req.method !== 'POST') return false;
-        const m = req.url?.match(/\/(.+)\/git-(.+)/);
-        if (!m) return false;
-        if (/\.\./.test(m[1])) return false;
+        if (req.method !== "POST") return false
+        const m = req.url?.match(/\/(.+)\/git-(.+)/)
+        if (!m) return false
+        if (/\.\./.test(m[1])) return false
 
         const repo = m[1],
-          service = m[2];
+          service = m[2]
 
         if (services.indexOf(service) < 0) {
-          res.statusCode = 405;
-          res.end('service not available');
-          return;
+          res.statusCode = 405
+          res.end("service not available")
+          return
         }
 
         res.setHeader(
-          'content-type',
-          'application/x-git-' + service + '-result'
-        );
-        noCache(res);
+          "content-type",
+          "application/x-git-" + service + "-result"
+        )
+        noCache(res)
 
         const action = createAction(
           {
@@ -475,37 +481,38 @@ export class Git extends EventEmitter implements GitEvents {
           },
           req,
           res
-        );
+        )
 
-        action.on('header', () => {
-          const evName = action.evName;
+        action.on("header", () => {
+          const evName = action.evName
           if (evName) {
-            const anyListeners = self.listeners(evName).length > 0;
-            self.emit(evName, action);
-            if (!anyListeners) action.accept();
+            const anyListeners = self.listeners(evName).length > 0
+            self.emit(evName, action)
+            if (!anyListeners) action.accept()
           }
-        });
+        })
       },
       (req: http.IncomingMessage, res: http.ServerResponse) => {
-        if (req.method !== 'GET' && req.method !== 'POST') {
-          res.statusCode = 405;
-          res.end('method not supported');
+        if (req.method !== "GET" && req.method !== "POST") {
+          res.statusCode = 405
+          res.end("method not supported")
         } else {
-          return false;
+          return false
         }
       },
       (req: http.IncomingMessage, res: http.ServerResponse) => {
-        res.statusCode = 404;
-        res.end('not found');
+        res.statusCode = 404
+        res.end("not found")
       },
-    ];
-    res.setHeader('connection', 'close');
+    ]
+    res.setHeader("connection", "close");
 
     (function next(ix) {
-      const x = handlers[ix].call(self, req, res);
-      if (x === false) next(ix + 1);
-    })(0);
+      const x = handlers[ix].call(self, req, res)
+      if (x === false) next(ix + 1)
+    })(0)
   }
+
   /**
    * starts a git server on the given port
    * @param  port  - the port to start the server on
@@ -517,22 +524,23 @@ export class Git extends EventEmitter implements GitEvents {
    */
   listen(port: number, options?: GitServerOptions, callback?: () => void): Git {
     if (!options) {
-      options = { type: 'http' };
+      options = {type: "http"}
     }
 
     const createServer =
-      options.type == 'http'
+      options.type == "http"
         ? http.createServer
-        : https.createServer.bind(this, options);
+        : https.createServer.bind(this, options)
 
     this.server = createServer((req, res) => {
-      this.handle(req, res);
-    });
+      this.handle(req, res)
+    })
 
-    this.server.listen(port, callback);
+    this.server.listen(port, callback)
 
-    return this;
+    return this
   }
+
   /**
    * closes the server instance
    * @param will resolve or reject when the server closes or fails to close.
@@ -540,8 +548,8 @@ export class Git extends EventEmitter implements GitEvents {
   close(): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       this.server?.close((err) => {
-        err ? reject(err) : resolve('Success');
-      });
-    });
+        err ? reject(err) : resolve("Success")
+      })
+    })
   }
 }

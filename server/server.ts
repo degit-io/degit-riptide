@@ -1,4 +1,4 @@
-import {Git} from "./src"
+import {Git} from "./src/git"
 import {join} from "path"
 
 const port = 7005
