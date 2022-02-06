@@ -27,7 +27,7 @@ const getRefs = async (req: Request, res: Response) => {
 const handlePack = async (service: string, repo: string, res: Response) => {
   const fullPath = getFullPath(repo)
   const cmd = `git-${service}-pack`
-  const args = [fullPath]
+  const args = ["--advertise-refs", fullPath]
   const child = spawn(cmd, args)
   let data = ""
   for await (const chunk of child.stdout) {
@@ -37,7 +37,10 @@ const handlePack = async (service: string, repo: string, res: Response) => {
       break
     }
   }
-  res.header("Content-Type", `application/x-git-${service}-pack-advertisement`)
+  res.setHeader("Content-Type", `application/x-git-${service}-pack-advertisement`)
+  res.setHeader("expires", "Fri, 01 Jan 1980 00:00:00 GMT")
+  res.setHeader("pragma", "no-cache")
+  res.setHeader("cache-control", "no-cache, max-age=0, must-revalidate")
   res.write(packSideband(`# service=git-${service}-pack` + "\n"))
   res.write("0000")
   res.write(data)

@@ -18,6 +18,7 @@ import {
   noCache,
 } from "./util"
 import {ServiceString} from "./types"
+import {logger} from "./log"
 
 const services = ["upload-pack", "receive-pack"]
 
@@ -484,10 +485,8 @@ export class Git extends EventEmitter implements GitEvents {
 
         action.on("header", () => {
           const evName = action.evName
-          console.log(evName)
           if (evName) {
             const anyListeners = self.listeners(evName).length > 0
-            console.log(anyListeners)
             self.emit(evName, action)
             if (!anyListeners) action.accept()
           }

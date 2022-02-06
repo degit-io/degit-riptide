@@ -2,16 +2,17 @@ import express, {Express} from "express"
 import morgan from "morgan"
 import {logger} from "./src/log"
 import {infoRouter} from "./routes/info.route"
+import {nonInfoRouter} from "./routes/noninfo.route"
 
 const configApp = (app: Express) => {
   app.use(morgan("combined"))
-  app.use(express.json())
-  app.use(express.urlencoded({extended: true}))
+  app.use(express.text({type: "*/*"}))
 }
 
 const setRoutes = (app: Express) => {
   app.use("/:repository/info", infoRouter)
-  app.use("/", (req, res) => res.end("Hello World!"))
+  app.use("/:repository", nonInfoRouter)
+  app.use("/", (req, res) => res.end("OK"))
 }
 
 const startServer = () => {

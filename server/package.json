@@ -18,10 +18,12 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.32.0",
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/morgan": "^1.9.3",
     "@types/through": "^0.0.30",
     "borsh": "^0.7.0",
+    "cors": "^2.8.5",
     "express": "^4.17.2",
     "morgan": "^1.10.0",
     "mz": "^2.7.0",

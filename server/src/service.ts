@@ -150,8 +150,7 @@ export class Service extends HttpDuplex {
         const respStream = through(
           // write
           (c: any) => {
-            // console.log("yo")
-            // console.log(c)
+            console.log(c.toString())
             if (this.listeners("response").length === 0) {
               if (this.logs.length > 0) {
                 while (this.logs.length > 0) {
