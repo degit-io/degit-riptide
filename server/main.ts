@@ -1,22 +1,27 @@
-import {Git} from "./src/git"
-import {join} from "path"
+import express, {Express} from "express"
+import morgan from "morgan"
+import {logger} from "./src/log"
+import {infoRouter} from "./routes/info.route"
 
-const port = 7005
+const configApp = (app: Express) => {
+  app.use(morgan("combined"))
+  app.use(express.json())
+  app.use(express.urlencoded({extended: true}))
+}
 
-const repos = new Git(join(__dirname, "repo"), {
-  autoCreate: true,
-})
+const setRoutes = (app: Express) => {
+  app.use("/:repository/info", infoRouter)
+  app.use("/", (req, res) => res.end("Hello World!"))
+}
 
-repos.on("push", (push) => {
-  console.log(`push ${push.repo}/${push.commit} ( ${push.branch} )`)
-  push.accept()
-})
+const startServer = () => {
+  const app = express()
+  configApp(app)
+  setRoutes(app)
 
-repos.on("fetch", (fetch) => {
-  console.log(`fetch ${fetch.commit}`)
-  fetch.accept()
-})
+  const port = Number(process.env.PORT) || 7050
+  app.listen(port)
+  logger.info(`Server started on port ${port}`)
+}
 
-repos.listen(port, null, () => {
-  console.log(`node-git-server running at http://localhost:${port}`)
-})
+startServer()

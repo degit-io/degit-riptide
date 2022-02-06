@@ -204,7 +204,7 @@ export class Git extends EventEmitter implements GitEvents {
       this.authenticate = options.authenticate
     }
 
-    this.autoCreate = options.autoCreate === false ? false : true
+    this.autoCreate = options.autoCreate !== false
     this.checkout = options.checkout
   }
 
@@ -237,7 +237,6 @@ export class Git extends EventEmitter implements GitEvents {
   /**
    * Find out whether `repoName` exists in the callback `cb(exists)`.
    * @param  repo - name of the repo
-   * @param  callback - function to be called when finished
    */
   exists(repo: string): boolean {
     return fs.existsSync(this.dirMap(repo))
@@ -246,7 +245,6 @@ export class Git extends EventEmitter implements GitEvents {
   /**
    * Create a subdirectory `dir` in the repo dir with a callback.
    * @param  dir - directory name
-   * @param  callback  - callback to be called when finished
    */
   mkdir(dir: string) {
     fs.mkdirSync(path.dirname(dir), {recursive: true})
@@ -318,12 +316,13 @@ export class Git extends EventEmitter implements GitEvents {
 
   /**
    * Handle incoming HTTP requests with a connect-style middleware
-   * @param  http request object
-   * @param  http response object
+   * @param  req - http request object
+   * @param  res - http response object
    */
   handle(req: http.IncomingMessage, res: http.ServerResponse) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this
+    console.log(`${req.method} ||| ${req.url} || ${req.rawHeaders}`)
 
     const handlers = [
       (req: http.IncomingMessage, res: http.ServerResponse) => {
@@ -485,8 +484,10 @@ export class Git extends EventEmitter implements GitEvents {
 
         action.on("header", () => {
           const evName = action.evName
+          console.log(evName)
           if (evName) {
             const anyListeners = self.listeners(evName).length > 0
+            console.log(anyListeners)
             self.emit(evName, action)
             if (!anyListeners) action.accept()
           }
