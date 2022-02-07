@@ -3,7 +3,7 @@ import {Request, Response} from "express"
 import {getFullPath, packSideband} from "../utils"
 
 
-const getRefs = async (req: Request, res: Response) => {
+export const getRefs = async (req: Request, res: Response) => {
   const repo = req.params.repository
   const service = req.query.service
   if (typeof service !== "string") {
@@ -43,8 +43,4 @@ const executeCmd = async (service: string, repo: string, res: Response) => {
   }
 
   res.end()
-}
-
-export {
-  getRefs
 }
