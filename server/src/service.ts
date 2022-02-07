@@ -84,7 +84,6 @@ export class Service extends HttpDuplex {
 
     ts.once("data", (chunk: string) => {
       data += chunk
-      console.log(`${chunk.length} | ${chunk}`)
 
       const ops = data.match(new RegExp(headerRegex[this.service], "gi"))
       if (!ops) return

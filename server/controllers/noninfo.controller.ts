@@ -18,7 +18,7 @@ export const postService = async (req: Request, res: Response) => {
 
 const executeCmd = async (service: string, req: Request, res: Response) => {
   const repo = req.params.repository
-  const body: string = req.body
+  const body = req.body
   const fullPath = getFullPath(repo)
   const args = ["--stateless-rpc", fullPath]
   const child = spawn(service, args)

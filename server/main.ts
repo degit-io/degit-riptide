@@ -6,7 +6,7 @@ import {nonInfoRouter} from "./routes/noninfo.route"
 
 const configApp = (app: Express) => {
   app.use(morgan("combined"))
-  app.use(express.text({type: "*/*"}))
+  app.use(express.raw({type: "*/*"}))
 }
 
 const setRoutes = (app: Express) => {
