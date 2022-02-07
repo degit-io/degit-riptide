@@ -204,7 +204,6 @@ export class Service extends HttpDuplex {
     const SIDEBAND = String.fromCharCode(2) // PROGRESS
     const message = `${SIDEBAND}${_log}\n`
     const formattedMessage = Buffer.from(packSideband(message))
-
     this.logs.unshift(formattedMessage.toString())
   }
 

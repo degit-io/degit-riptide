@@ -27,7 +27,7 @@ const getRefs = async (req: Request, res: Response) => {
 const handlePack = async (service: string, repo: string, res: Response) => {
   const fullPath = getFullPath(repo)
   const cmd = `git-${service}-pack`
-  const args = ["--advertise-refs", fullPath]
+  const args = ["--stateless-rpc", "--advertise-refs", fullPath]
   const child = spawn(cmd, args)
   let data = ""
   for await (const chunk of child.stdout) {

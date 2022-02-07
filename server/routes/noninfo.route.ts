@@ -1,8 +1,8 @@
 import express from "express"
-import {postUploadPack} from "../controllers/noninfo.controller"
+import {postService} from "../controllers/noninfo.controller"
 
 const router = express.Router({mergeParams: true})
-router.post("/git-upload-pack", postUploadPack)
+router.post("/:service", postService)
 
 export {
   router as nonInfoRouter
