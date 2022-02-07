@@ -125,16 +125,11 @@ export class Service extends HttpDuplex {
     })
 
     this.once("accept", () => {
-      console.log("hey there")
-      console.log(opts.cwd)
       process.nextTick(() => {
         const cmd =
           os.platform() == "win32"
             ? ["git", opts.service, "--stateless-rpc", opts.cwd]
             : ["git-" + opts.service, "--stateless-rpc", opts.cwd]
-
-        console.log(cmd[0])
-        console.log(cmd.slice(1))
 
         const ps = spawn(cmd[0], cmd.slice(1))
 
@@ -150,7 +145,6 @@ export class Service extends HttpDuplex {
         const respStream = through(
           // write
           (c: any) => {
-            console.log(c.toString())
             if (this.listeners("response").length === 0) {
               if (this.logs.length > 0) {
                 while (this.logs.length > 0) {
