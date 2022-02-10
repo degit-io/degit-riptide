@@ -9,8 +9,8 @@ use solana_program::{
 };
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct TestAccount {
-  pub z: String,
+pub struct DataAccount {
+  pub git_ref: String,
 }
 
 entrypoint!(process_instruction);
@@ -20,42 +20,43 @@ pub fn process_instruction(
   accounts: &[AccountInfo],
   instruction_data: &[u8],
 ) -> ProgramResult {
-  let msg = format!("Program working fine - {}", program_id);
-  msg!(&msg);
+  // let msg = format!("Program working fine - {}", program_id);
 
   let accounts_iter = &mut accounts.iter();
   let account = next_account_info(accounts_iter)?;
-  msg!("Account owner: {:?}", account.owner);
 
-  let msg = account.key.to_string();
-  msg!(&msg);
+  if account.owner != program_id {
+    return Err(ProgramError::IllegalOwner);
+  }
 
-  let test_account = TestAccount::try_from_slice(&instruction_data);
-  let mut t = match test_account {
-    Ok(test_account) => test_account,
+  // msg!("Account owner: {:?}", account.owner);
+  //
+  // let msg = account.key.to_string();
+  // msg!(&msg);
+
+  let data_account = DataAccount::try_from_slice(&instruction_data);
+  let data_account = match data_account {
+    Ok(a) => a,
     Err(err) => {
-      msg!("Error deserializing TestAccount");
-      msg!(&err.to_string());
-      return Ok(());
+      msg!("Error deserializing DataAccount - {:?}", &err.to_string());
+      return Err(ProgramError::InvalidInstructionData);
     }
   };
 
-  let result = t.serialize(&mut &mut account.data.borrow_mut()[..]);
+  let result = data_account.serialize(&mut &mut account.data.borrow_mut()[..]);
   if let Err(err) = result {
-    msg!("Error serializing TestAccount");
-    msg!(&err.to_string());
-    return Ok(());
+    msg!("Error deserializing DataAccount - {:?}", &err.to_string());
+    return Err(ProgramError::InvalidInstructionData);
   }
 
-  let account_data = TestAccount::try_from_slice(&account.data.borrow());
+  let account_data = DataAccount::try_from_slice(&account.data.borrow());
   match account_data {
     Ok(account_data) => {
-      msg!(&account_data.z);
+      msg!(&account_data.git_ref);
     }
     Err(err) => {
-      msg!("Error reading account_data");
-      msg!(&err.to_string());
-      return Ok(());
+      msg!("Error reading data - {:?}", &err.to_string());
+      return Err(ProgramError::InvalidInstructionData);
     }
   }
 

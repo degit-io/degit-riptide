@@ -11,12 +11,6 @@ export const getRefs = async (req: Request, res: Response) => {
     return
   }
 
-  // res.setHeader("Content-Type", "text/plain")
-  // res.setHeader("WWW-Authenticate", "Basic realm=\"authorization needed\"")
-  // res.writeHead(401)
-  // res.end("401 Unauthorized")
-  // return
-
   switch (service) {
     case "git-upload-pack":
       await executeCmd("upload", repo, res)

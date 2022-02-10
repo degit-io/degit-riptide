@@ -1,17 +1,17 @@
 import {spawn} from "child_process"
-import {Request, Response} from "express"
+import {NextFunction, Request, Response} from "express"
 import {getFullPath} from "../utils"
 
 const validServices = ["git-upload-pack", "git-receive-pack"]
 
-export const postService = async (req: Request, res: Response) => {
+export const handleGitCmd = async (req: Request, res: Response, next: NextFunction) => {
   const service = req.params.service
   if (!validServices.includes(service)) {
     res.status(400).send("Invalid service requested")
     return
   }
   await executeCmd(service, req, res)
-  return
+  next()
 }
 
 
@@ -34,6 +34,4 @@ const executeCmd = async (service: string, req: Request, res: Response) => {
   for await (const chunk of child.stdout) {
     res.write(chunk)
   }
-  res.end()
-  return
 }
