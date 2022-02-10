@@ -10,7 +10,6 @@ export const postService = async (req: Request, res: Response) => {
     res.status(400).send("Invalid service requested")
     return
   }
-
   await executeCmd(service, req, res)
   return
 }
