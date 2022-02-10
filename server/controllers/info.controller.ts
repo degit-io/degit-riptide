@@ -1,6 +1,6 @@
 import {spawn} from "child_process"
 import {Request, Response} from "express"
-import {getFullPath, packSideband} from "../utils"
+import {getFullPath, packSideband} from "../src/utils"
 
 
 export const getRefs = async (req: Request, res: Response) => {

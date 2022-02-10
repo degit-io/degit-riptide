@@ -1,6 +1,6 @@
 import {spawn} from "child_process"
 import {NextFunction, Request, Response} from "express"
-import {getFullPath} from "../utils"
+import {getFullPath} from "../src/utils"
 
 const validServices = ["git-upload-pack", "git-receive-pack"]
 
