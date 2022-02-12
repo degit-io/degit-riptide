@@ -9,7 +9,7 @@ use solana_program::{
 };
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct DataAccount {
+pub struct InstructionData {
   pub git_ref: String,
 }
 
@@ -20,45 +20,34 @@ pub fn process_instruction(
   accounts: &[AccountInfo],
   instruction_data: &[u8],
 ) -> ProgramResult {
-  // let msg = format!("Program working fine - {}", program_id);
-
   let accounts_iter = &mut accounts.iter();
   let account = next_account_info(accounts_iter)?;
 
+  // Validate the account is created by the program
   if account.owner != program_id {
     return Err(ProgramError::IllegalOwner);
   }
 
-  // msg!("Account owner: {:?}", account.owner);
-  //
-  // let msg = account.key.to_string();
-  // msg!(&msg);
-
-  let data_account = DataAccount::try_from_slice(&instruction_data);
-  let data_account = match data_account {
+  // Transform the instruction data into a DataAccount
+  let parsed = InstructionData::try_from_slice(&instruction_data);
+  let parsed = match parsed {
     Ok(a) => a,
     Err(err) => {
-      msg!("Error deserializing DataAccount - {:?}", &err.to_string());
+      msg!("Failed to parse instruction data - {:?}", err);
       return Err(ProgramError::InvalidInstructionData);
     }
   };
 
-  let result = data_account.serialize(&mut &mut account.data.borrow_mut()[..]);
+  // Write the data to the account
+  let result = parsed.serialize(&mut &mut account.data.borrow_mut()[..]);
   if let Err(err) = result {
-    msg!("Error deserializing DataAccount - {:?}", &err.to_string());
+    msg!("Error serialize InstructionData into account data - {:?}", err);
     return Err(ProgramError::InvalidInstructionData);
   }
 
-  let account_data = DataAccount::try_from_slice(&account.data.borrow());
-  match account_data {
-    Ok(account_data) => {
-      msg!(&account_data.git_ref);
-    }
-    Err(err) => {
-      msg!("Error reading data - {:?}", &err.to_string());
-      return Err(ProgramError::InvalidInstructionData);
-    }
-  }
+  // Print the updated data for debug
+  let account_data = InstructionData::try_from_slice(&account.data.borrow());
+  msg!("Updated account data - {:?}", account_data);
 
   Ok(())
 }
