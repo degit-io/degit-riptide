@@ -1,0 +1,59 @@
+.Container {
+  @apply w-full h-full;
+  @apply flex-grow;
+}
+
+.NotSignInContainer {
+  @apply h-full;
+  @apply flex flex-col justify-center items-center gap-16;
+}
+
+.NotSignInImg {
+  width: 300px;
+}
+
+.AskSignInText {
+  @apply self-center text-3xl;
+}
+
+.SignedInContainer {
+  @apply flex flex-col p-4 h-full;
+}
+
+.Header {
+  @apply text-2xl font-bold;
+  @apply border-0 border-b-2 border-gray-200;
+  flex: 0 0 60px;
+}
+
+.Widget {
+  @apply flex-grow;
+  @apply flex flex-col justify-center;
+}
+
+.Row {
+  @apply flex flex-row gap-8 m-6;
+}
+
+.RowItem {
+  flex: 1 1 50%;
+  @apply flex flex-col gap-8 items-center justify-center;
+  @apply h-72;
+  @apply border-2 border-gray-200 rounded-2xl;
+}
+
+.ItemHeader {
+  @apply text-xl font-bold;
+}
+
+.ItemValue {
+  @apply text-3xl;
+}
+
+.RowWithinItem {
+  @apply flex flex-row gap-2 items-center justify-center;
+}
+
+.EditDisplayNameIcon {
+  @apply cursor-pointer;
+}

@@ -1,0 +1,56 @@
+.Container {
+  width: 450px;
+  height: 650px;
+  @apply flex flex-col justify-start items-stretch;
+}
+
+.Header {
+  @apply flex flex-col justify-center items-center;
+  @apply p-4;
+  @apply border-0 border-b-2 border-gray-300;
+}
+
+.Wallet {
+  @apply text-lg font-bold;
+}
+
+.PublicKeyRow {
+  @apply flex flex-row items-center gap-2;
+}
+
+.PublicKey {
+  @apply text-xs;
+}
+
+.ContentCopyIcon {
+  transform: scale(0.8);
+  @apply cursor-pointer;
+}
+
+.Balance {
+  @apply self-center;
+  @apply pt-6 pb-6;
+  @apply text-3xl font-bold;
+}
+
+.ActionRow {
+  @apply flex flex-row gap-8 self-center;
+}
+
+.ActionButton {
+  min-width: 150px;
+  @apply text-center;
+  @apply pt-2 pb-2;
+  @apply border-2 border-gray-300 rounded-lg;
+  @apply cursor-pointer hover:opacity-75;
+}
+
+.Network {
+  @apply p-4 mt-auto;
+  @apply border-0 border-t-2 border-gray-100;
+}
+
+.Separator {
+  @apply h-0.5;
+  @apply bg-gray-100 mt-8;
+}

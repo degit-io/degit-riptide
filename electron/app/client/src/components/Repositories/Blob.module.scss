@@ -1,0 +1,38 @@
+.Container {
+  @apply flex flex-col;
+  @apply p-8;
+}
+
+.Header {
+  flex: 0 0 60px;
+  @apply flex flex-row items-center gap-8;
+  @apply pl-4 pr-4;
+  @apply bg-gray-200 rounded-t-2xl;
+}
+
+.PublicKey {
+
+}
+
+.CommitMessage {
+
+}
+
+.LatestCommit {
+  @apply ml-auto;
+}
+
+.SubHeader {
+  flex: 0 0 40px;
+  @apply flex flex-row items-center;
+  @apply pl-4 pr-4;
+  @apply bg-gray-100;
+}
+
+.FileName {
+
+}
+
+.Code {
+  @apply rounded-b-2xl;
+}

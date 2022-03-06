@@ -1,0 +1,65 @@
+.Container {
+  @apply flex-grow h-full w-full;
+  @apply flex flex-col items-stretch;
+}
+
+.Header {
+  flex: 0 0 100px;
+  @apply flex flex-row items-center gap-6;
+  @apply pl-8 pr-8;
+  @apply text-lg;
+}
+
+.HeaderCircle {
+  @apply text-yellow-300;
+  transform: scale(1.5);
+}
+
+.RepoInfo {
+  @apply flex flex-col;
+}
+
+.RepoName {
+  @apply font-bold text-2xl;
+}
+
+.CreatedBy {
+  @apply text-sm;
+}
+
+.StatusRow {
+  @apply ml-auto;
+  @apply flex flex-row items-center gap-6;
+}
+
+.StatusColumn {
+  @apply flex flex-col items-start;
+}
+
+.StatusKey {
+  @apply font-bold text-base;
+}
+
+.StatusValue {
+  @apply font-normal text-base;
+}
+
+.OptionBar {
+  flex: 0 0 64px;
+  @apply flex flex-row justify-start items-center gap-10;
+  @apply bg-gray-100;
+  @apply pl-10 pr-10 ml-0.5;
+}
+
+.Option {
+  flex: 0 0 150px;
+  @apply flex flex-row justify-center items-center;
+  @apply h-full;
+  @apply border-0 border-b-4 border-transparent;
+  @apply cursor-pointer hover:opacity-80;
+  @apply text-sm font-bold;
+}
+
+.ActiveOption {
+  @apply border-yellow-400;
+}

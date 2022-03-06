@@ -1,0 +1,13 @@
+.Container {
+  @apply flex flex-row;
+  height: 100vh;
+}
+
+.Separator {
+  @apply pt-4 pb-4;
+}
+
+.Page {
+  @apply flex-grow;
+  @apply overflow-auto;
+}

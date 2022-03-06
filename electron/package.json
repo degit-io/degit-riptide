@@ -1,0 +1,35 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "copy": "copyfiles -u 1 app/**/*.html app/**/*.css app/assets/**/* dist/",
+    "clean": "rm -rf dist/",
+    "ng-serve": "cd app/angular; ng serve",
+    "start": "npm run clean && tsc && electron dist/main.js",
+    "test-client": "cd app/client && npm run start",
+    "test-server": "tsc && cd dist/server && node start_server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/node": "^17.0.18",
+    "@types/express": "^4.17.13",
+    "@types/morgan": "^1.9.3",
+    "concurrently": "^7.0.0",
+    "copyfiles": "^2.4.1",
+    "electron": "^17.0.0",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5",
+    "wait-on": "^6.0.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "ipfs": "^0.60.0",
+    "morgan": "^1.10.0",
+    "orbit-db": "^0.27.2"
+  }
+}

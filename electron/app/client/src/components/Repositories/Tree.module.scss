@@ -1,0 +1,48 @@
+.Container {
+  @apply flex flex-col flex-grow;
+}
+
+.FileListContainer {
+  @apply flex flex-col;
+  @apply pl-4 pr-4 pb-8 pt-2 m-4;
+  @apply border-2 border-gray-100 rounded-2xl;
+}
+
+.Item {
+  flex: 0 0 75px;
+  @apply flex flex-row items-center gap-4;
+  @apply pl-4 pr-4;
+  @apply border-0 border-b-2 border-gray-50;
+}
+
+.FileName {
+}
+
+.LastModified {
+  @apply ml-auto;
+}
+
+.ReadMeHeader {
+  @apply ml-4 mt-8;
+  @apply text-base font-bold;
+}
+
+.ReadMeContainer {
+  @apply p-8 m-4;
+  @apply border-2 border-gray-100 rounded-2xl;
+}
+
+.NoContentContainer {
+  @apply flex-grow;
+  @apply flex flex-col items-center justify-center gap-4;
+}
+
+.InstructionHeader {
+  @apply text-2xl font-bold;
+}
+
+.InstructionCodeBlock {
+  width: 40rem;
+  @apply flex flex-col bg-gray-100;
+  @apply p-4 rounded-lg mb-12;
+}

@@ -1,0 +1,52 @@
+.Container {
+  @apply flex-grow w-full h-full p-4;
+  @apply flex flex-col items-start;
+}
+
+.Header {
+  @apply text-2xl font-bold w-full;
+  @apply border-0 border-b-2 border-gray-200;
+  @apply mb-6;
+  flex: 0 0 60px;
+}
+
+.InputBlock {
+  @apply flex flex-col gap-2 mb-6;
+}
+
+.InputTitle {
+  @apply text-base font-bold;
+}
+
+.InputField {
+  @apply w-64 bg-gray-100 pl-2 pr-2;
+  @apply border-2 border-gray-200 rounded-xl;
+  @apply h-8;
+  @apply focus:border-yellow-500;
+  &:focus {
+    outline: none;
+  }
+}
+
+.LongInputField {
+  width: 48rem;
+  @apply h-8;
+  @apply bg-gray-100 pl-2 pr-2;
+  @apply border-2 border-gray-200 rounded-xl;
+  @apply focus:border-yellow-500;
+  &:focus {
+    outline: none;
+  }
+}
+
+.CreateButton {
+  @apply pt-2 pb-2 pl-4 pr-4 mt-4;
+  @apply text-lg font-bold;
+  @apply bg-yellow-500 text-white rounded-xl;
+  @apply cursor-pointer hover:opacity-75 duration-200;
+  @apply shadow-lg;
+}
+
+.CloseSnackButton {
+  @apply text-white;
+}

@@ -1,0 +1,64 @@
+.Container {
+  @apply w-full h-full p-4;
+  @apply flex-grow;
+}
+
+.RepoRow {
+  @apply pt-6 pb-6 pl-4 pr-4;
+  @apply border-0 border-b-2 border-gray-200;
+  @apply cursor-pointer;
+  @apply flex flex-col gap-2;
+}
+
+.RepoName {
+  @apply text-2xl font-bold;
+}
+
+.RepoDescription {
+  @apply text-base text-gray-600;
+}
+
+.NoRepoDescription {
+  @apply text-base italic text-gray-400;
+}
+
+.NoReposContainer {
+  @apply flex flex-col justify-center items-center gap-16;
+  @apply h-full;
+}
+
+.NoReposImg {
+  @apply w-64;
+}
+
+.CreateRepoButton {
+  @apply pt-4 pb-4 pl-8 pr-8;
+  @apply text-xl font-bold;
+  @apply bg-yellow-500 text-white rounded-full;
+  @apply cursor-pointer hover:opacity-75 duration-200;
+  @apply shadow-lg;
+}
+
+.RepoListContainer {
+  @apply flex flex-col justify-start items-stretch;
+}
+
+.HeaderRow {
+  flex: 0 0 60px;
+  @apply flex flex-row items-center;
+  @apply w-full;
+  @apply border-0 border-b-2 border-gray-200;
+  @apply mb-6;
+}
+
+.Header {
+  @apply text-2xl font-bold;
+}
+
+.NewRepoButton {
+  @apply pt-1 pb-1 pl-4 pr-4 ml-auto;
+  @apply text-base font-bold;
+  @apply bg-yellow-500 text-white rounded-full;
+  @apply cursor-pointer hover:opacity-75 duration-200;
+  @apply shadow-lg;
+}

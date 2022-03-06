@@ -1,0 +1,9 @@
+.Container {
+  @apply flex flex-col flex-grow h-full w-full p-4;
+}
+
+.Header {
+  @apply text-2xl font-bold;
+  @apply border-0 border-b-2 border-gray-200;
+  flex: 0 0 60px;
+}

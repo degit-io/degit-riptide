@@ -1,0 +1,42 @@
+.MenuContainer {
+  @apply flex flex-col;
+  @apply border-0 border-r-2 border-gray-300;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  flex: 0 0 230px;
+  max-width: 230px;
+  overflow: hidden;
+}
+
+.Logo {
+  @apply p-8;
+  & img {
+    height: 40px;
+  }
+}
+
+.MenuItem {
+  @apply flex flex-row gap-4 justify-start items-center;
+  @apply pt-4 pb-4 pl-6 mt-1 mb-1;
+  @apply cursor-pointer hover:opacity-80;
+  @apply border-0 border-l-4 border-transparent;
+  @apply text-gray-400;
+}
+
+.ActiveMenuItem {
+  @apply border-yellow-500 text-black bg-yellow-50;
+}
+
+.Grow {
+  @apply flex-auto;
+}
+
+.CopyRight {
+  @apply text-xs text-center text-gray-400 p-2;
+}
+
+.CreateWallet {
+  @apply flex flex-row gap-4 justify-start items-center;
+  @apply mt-auto p-6;
+  @apply border-0 border-t-2 border-gray-200;
+  @apply cursor-pointer hover:opacity-80;
+}
