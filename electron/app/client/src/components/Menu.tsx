@@ -27,6 +27,7 @@ export const Menu = () => {
 
   const onClickWallet = async () => {
     if (!isAuthenticated) {
+      await openLogin.init()
       const {privKey} = await openLogin.login()
       if (privKey) {
         const {sk} = getED25519Key(privKey)
