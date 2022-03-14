@@ -1,33 +1,20 @@
 import styles from "./NewRepo.module.scss"
-import {useState} from "react"
+import {useContext, useState} from "react"
 import Snackbar from "@mui/material/Snackbar"
 import IconButton from "@mui/material/IconButton"
 import CloseIcon from "@mui/icons-material/Close"
 import {AppConfig} from "../../config/Config"
 import {useNavigate} from "react-router-dom"
+import {AuthContext} from "../../contexts/auth"
+import {HelperContext} from "../../contexts/Helper.context"
 
 
 export const NewRepo = () => {
-  const [openSnack, setOpenSnack] = useState(false)
-  const [snackMessage, setSnackMessage] = useState("")
+  const {keypair} = useContext(AuthContext)
+  const {setOpenSnack, setSnackMessage} = useContext(HelperContext)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const navigate = useNavigate()
-
-  const handleCloseSnack = (event: any, reason: any) => {
-    if (reason === "clickaway") {
-      return
-    }
-    setOpenSnack(false)
-  }
-
-  const getSnackBar = () => {
-    return (
-      <IconButton onClick={() => setOpenSnack(false)}>
-        <CloseIcon className={styles.CloseSnackButton} fontSize="small"/>
-      </IconButton>
-    )
-  }
 
   const onCreateRepo = () => {
     if (!name.trim()) {
@@ -35,6 +22,13 @@ export const NewRepo = () => {
       setSnackMessage("Repository name is required")
       return
     }
+
+    if (keypair === undefined) {
+      setOpenSnack(true)
+      setSnackMessage("You are not logged in")
+      return
+    }
+
     fetch(
       `${AppConfig.metaUrl}/db/profile/repos`,
       {
@@ -44,7 +38,8 @@ export const NewRepo = () => {
         },
         body: JSON.stringify({
           name,
-          description
+          description,
+          publicKey: keypair.publicKey.toBase58(),
         })
       }
     )
@@ -89,14 +84,6 @@ export const NewRepo = () => {
       >
         Create
       </div>
-
-      <Snackbar
-        open={openSnack}
-        autoHideDuration={5000}
-        onClose={handleCloseSnack}
-        message={snackMessage}
-        action={getSnackBar()}
-      />
 
     </div>
   )

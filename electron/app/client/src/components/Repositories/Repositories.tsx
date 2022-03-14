@@ -12,21 +12,36 @@ interface RepoInterface {
 
 interface ReposResponse {
   repos: RepoInterface[]
+  orbitId: string
 }
 
 export const Repositories = () => {
   const {keypair} = useContext(AuthContext)
   const [isLoaded, setIsLoaded] = useState(false)
   const [repos, setRepos] = useState<RepoInterface[]>([])
+  const [orbitId, setOrbitId] = useState("")
 
   useEffect(() => {
-    fetch(`${AppConfig.metaUrl}/db/profile/repos`)
+    if (keypair === undefined) {
+      return
+    }
+
+    const publicKey = keypair.publicKey.toBase58()
+    const url = `${AppConfig.metaUrl}/db/profile/repos?publicKey=${publicKey}`
+    fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
       .then(res => res.json())
       .then((res: ReposResponse) => {
         setRepos(res.repos)
+        setOrbitId(res.orbitId)
         setIsLoaded(true)
       })
-  }, [])
+  }, [keypair])
 
   const createNoReposContainer = () => {
     return (
@@ -49,7 +64,9 @@ export const Repositories = () => {
     return reposCopy.map(repo => {
       const publicKey = keypair?.publicKey.toBase58() || ""
       return (
-        <Link to={`/repos/${publicKey}/${repo.name}`} key={repo.name}>
+        <Link to={`/repos/${orbitId}/${publicKey}/${repo.name}`}
+              key={`/repos/${orbitId}/${publicKey}/${repo.name}`}
+        >
           <div className={styles.RepoRow}
                key={repo.name}
           >

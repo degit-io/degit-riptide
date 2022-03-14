@@ -1,6 +1,10 @@
 import {spawn} from "child_process"
 import {NextFunction, Request, Response} from "express"
 import {getFullPath} from "../utils"
+import * as IPFS from "ipfs"
+import fs from "fs"
+import path from "path"
+import os from "os"
 
 const validServices = ["git-upload-pack", "git-receive-pack"]
 
@@ -40,4 +44,55 @@ const executeCmd = async (service: string, req: Request, res: Response) => {
   })
 
   res.end()
+}
+
+export const generateBundle = async (req: Request, res: Response, next: NextFunction) => {
+  const repo = req.params.repository
+  const fullPath = getFullPath(repo)
+
+  // Create Git bundle
+  const bundle = spawn(
+    `cd ${fullPath} && git bundle create ${repo}.bundle --all`,
+    {
+      shell: true,
+    }
+  )
+  await new Promise((resolve, _) => {
+    bundle.on("close", resolve)
+  })
+
+  res.locals.bundlePath = `${fullPath}/${repo}.bundle`
+
+  next()
+}
+
+export const pushToIPFS = async (req: Request, res: Response, next: NextFunction) => {
+  const bundlePath = res.locals.bundlePath
+  const ipfs: IPFS.IPFS = req.app.get("ipfs")
+  const buffer = fs.readFileSync(bundlePath)
+  const result = await ipfs.add(buffer)
+  res.locals.ipfsPath = result.path
+  next()
+}
+
+export const updateOrbitDB = async (req: Request, res: Response, next: NextFunction) => {
+  const orbitdb = req.app.get("orbitdb")
+  const publicKey = fs.readFileSync(
+    path.join(os.homedir(), ".degit", "publickey")
+  )
+  const repo = req.params.repository
+
+  const dbName = publicKey.toString().trim()
+  const db = await orbitdb.open(
+    dbName,
+    {
+      create: true,
+      localOnly: false,
+      type: "keyvalue",
+    }
+  )
+  await db.load()
+  const ipfsPath = res.locals.ipfsPath
+  await db.put(repo, {"ipfs": ipfsPath})
+  next()
 }

@@ -10,6 +10,9 @@ import {dbRouter} from "./routes/db.route"
 import * as IPFS from "ipfs"
 import OrbitDB from "orbit-db"
 import {Connection} from "@solana/web3.js"
+import fs from "fs"
+import path from "path"
+import os from "os"
 
 let ipfs: IPFS.IPFS
 let orbitdb: any
@@ -46,16 +49,6 @@ export const initIPFSServer = async (): Promise<IPFS.IPFS> => {
 const testServer = async () => {
   ipfs = await IPFS.create()
   orbitdb = await OrbitDB.createInstance(ipfs)
-  profile = await orbitdb.open(
-    "profile",
-    {
-      create: true,
-      localOnly: false,
-      type: "keyvalue",
-    }
-  )
-  await profile.load()
-
   solana = new Connection(
     "http://localhost:8899",
     "confirmed"
@@ -63,11 +56,13 @@ const testServer = async () => {
 
   const metaServer = initMetaServer()
   metaServer.set("orbitdb", orbitdb)
-  metaServer.set("profile", profile)
   metaServer.set("solana", solana)
+  metaServer.set("ipfs", ipfs)
   metaServer.listen(Config.META_SERVER_PORT)
 
   const gitServer = initGitServer()
+  gitServer.set("orbitdb", orbitdb)
+  gitServer.set("ipfs", ipfs)
   gitServer.listen(Config.GIT_SERVER_PORT)
 }
 

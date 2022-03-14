@@ -10,6 +10,8 @@ import ReactMarkdown from "react-markdown"
 
 interface TreeProps {
   repoId: string
+  orbitId: string
+  publicKey: string
 }
 
 interface TreeMeta {
@@ -23,7 +25,7 @@ interface TreeResponse {
   hasReadMe: boolean
 }
 
-export const Tree = ({repoId}: TreeProps) => {
+export const Tree = ({repoId, orbitId, publicKey}: TreeProps) => {
   const params = useParams()
   const branch = params.branch || "master"
   const dirName = params["*"]
@@ -39,6 +41,7 @@ export const Tree = ({repoId}: TreeProps) => {
       if (dirName !== undefined) {
         api = `${api}/${dirName}`
       }
+      api = `${api}?publicKey=${publicKey}&orbitId=${orbitId}`
       fetch(api)
         .then(res => res.json())
         .then((res: TreeResponse) => {

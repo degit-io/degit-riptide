@@ -12,26 +12,27 @@ import {AuthContext} from "../../contexts/auth"
 import {HelperContext} from "../../contexts/Helper.context"
 
 export const Repository = () => {
-  const {publicKey, repoId} = useParams()
+  const {orbitId, publicKey, repoId} = useParams()
   const location = useLocation()
   const {keypair} = useContext(AuthContext)
   const {setOpenSnack, setSnackMessage, setIsShowProgressBar} = useContext(HelperContext)
-  if (!repoId || !publicKey) {
+
+  if (!repoId || !publicKey || !orbitId) {
     return (
       <h1>Invalid repository</h1>
     )
   }
 
-  const isOnProposals = location.pathname === `/repos/${repoId}/proposals`
+  const isOnProposals = location.pathname.endsWith("proposals")
   const proposalsClass = isOnProposals ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
 
-  const isOnIssues = location.pathname === `/repos/${repoId}/issues`
+  const isOnIssues = location.pathname.endsWith("issues")
   const issuesClass = isOnIssues ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
 
-  const isOnSettings = location.pathname === `/repos/${repoId}/settings`
+  const isOnSettings = location.pathname.endsWith("settings")
   const settingsClass = isOnSettings ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
 
-  const isOnContents = !isOnProposals && !isOnIssues
+  const isOnContents = !isOnProposals && !isOnIssues && !isOnSettings
   const contentsClass = isOnContents ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
 
   const onClickMakeDAO = () => {
@@ -113,9 +114,9 @@ export const Repository = () => {
         <Route path="proposals" element={<Proposals/>}/>
         <Route path="issues" element={<Issues/>}/>
         <Route path="settings" element={<Settings/>}/>
-        <Route path="/" element={<Tree repoId={repoId}/>}/>
-        <Route path="/blob/:branch/*" element={<Blob repoId={repoId}/>}/>
-        <Route path="/tree/:branch/*" element={<Tree repoId={repoId}/>}/>
+        <Route path="/" element={<Tree repoId={repoId} orbitId={orbitId} publicKey={publicKey}/>}/>
+        <Route path="/blob/:branch/*" element={<Blob repoId={repoId} orbitId={orbitId} publicKey={publicKey}/>}/>
+        <Route path="/tree/:branch/*" element={<Tree repoId={repoId} orbitId={orbitId} publicKey={publicKey}/>}/>
       </Routes>
     </div>
   )

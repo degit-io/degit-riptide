@@ -1,19 +1,60 @@
 import {Request, Response} from "express"
-import {Config} from "../../config"
 import {spawn} from "child_process"
 import * as fs from "fs"
-import {getFullPath} from "../utils"
+import * as IPFS from "ipfs"
+import {getDegitDir, getFullPath, getPublicKey} from "../utils"
 
+const downloadGitBundleFromIPFS = async (req: Request,
+                                         repoId: string,
+                                         publicKey: string,
+                                         orbitId: string,
+                                         fullPath: string) => {
+  const orbitdb = req.app.get("orbitdb")
+
+  const dbName = `/orbitdb/${orbitId}/${publicKey}`
+  const db = await orbitdb.keyvalue(dbName)
+  await db.load()
+
+  const record = await db.get(`${repoId}.git`)
+  const ipfsRef = record.ipfs
+  const ipfs: IPFS.IPFS = req.app.get("ipfs")
+  const chunks: Uint8Array[] = []
+  for await (const chunk of ipfs.cat(ipfsRef)) {
+    chunks.push(chunk)
+  }
+  const concat = Buffer.concat(chunks)
+  fs.writeFileSync(`${fullPath}.bundle`, concat)
+  const unbundle = spawn(
+    `cd ${getDegitDir()}/${publicKey} && git clone ${fullPath}.bundle && rm ${fullPath}.bundle`,
+    {
+      shell: true,
+    }
+  )
+  await new Promise((resolve, _) => {
+    unbundle.on("close", resolve)
+  })
+}
 
 export const getTree = async (req: Request, res: Response) => {
   const repoId = req.params.repoId
-  const fullPath = getFullPath(`${repoId}.git`)
-  console.log(fullPath)
+  const publicKey = req.query.publicKey ?? getPublicKey()
+  const orbitId = req.query.orbitId
+  const fullPath = getFullPath(`${repoId}.git`, publicKey as string)
 
-  // Check if directory exists
+  // Check if directory exists. If not, download from IPFS
   if (!fs.existsSync(fullPath)) {
-    res.json({})
-    return
+    try {
+      await downloadGitBundleFromIPFS(
+        req,
+        repoId,
+        publicKey as string,
+        orbitId as string,
+        fullPath
+      )
+    } catch (e) {
+      res.status(500).send({"error": e})
+      return
+    }
   }
 
   process.chdir(fullPath)
@@ -102,7 +143,26 @@ export const getTree = async (req: Request, res: Response) => {
 
 export const getBlob = async (req: Request, res: Response) => {
   const repoId = req.params.repoId
-  const fullPath = getFullPath(`${repoId}.git`)
+  const publicKey = (req.query.publicKey ?? getPublicKey()) as string
+  const orbitId = req.query.orbitId as string
+  const fullPath = getFullPath(`${repoId}.git`, publicKey)
+
+  // Check if directory exists. If not, download from IPFS
+  if (!fs.existsSync(fullPath)) {
+    try {
+      await downloadGitBundleFromIPFS(
+        req,
+        repoId,
+        publicKey,
+        orbitId,
+        fullPath
+      )
+    } catch (e) {
+      res.status(500).send({"error": e})
+      return
+    }
+  }
+
   process.chdir(fullPath)
 
   const branch = req.params.branch

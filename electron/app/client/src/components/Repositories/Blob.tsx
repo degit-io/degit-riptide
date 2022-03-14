@@ -8,13 +8,15 @@ import {docco} from "react-syntax-highlighter/dist/esm/styles/hljs"
 
 interface BlobProps {
   repoId: string
+  orbitId: string
+  publicKey: string
 }
 
 export interface BlobResponse {
   body: string
 }
 
-export const Blob = ({repoId}: BlobProps) => {
+export const Blob = ({repoId, orbitId, publicKey}: BlobProps) => {
   const params = useParams()
   const branch = params.branch
   const fileName = params["*"]
@@ -22,7 +24,8 @@ export const Blob = ({repoId}: BlobProps) => {
 
   useEffect(
     () => {
-      const api = `${AppConfig.metaUrl}/meta/${repoId}/blob/${branch}/${fileName}`
+      let api = `${AppConfig.metaUrl}/meta/${repoId}/blob/${branch}/${fileName}`
+      api = `${api}?publicKey=${publicKey}&orbitId=${orbitId}`
       fetch(api)
         .then(res => res.json())
         .then((res: BlobResponse) => {

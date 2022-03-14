@@ -26,7 +26,7 @@ const RepositoryRoutes = () => {
     <Routes>
       <Route path="/" element={<Repositories/>}/>
       <Route path="/create" element={<NewRepo/>}/>
-      <Route path=":publicKey/:repoId/*" element={<Repository/>}/>
+      <Route path=":orbitId/:publicKey/:repoId/*" element={<Repository/>}/>
     </Routes>
   )
 }

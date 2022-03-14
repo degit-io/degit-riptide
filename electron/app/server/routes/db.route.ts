@@ -3,7 +3,8 @@ import {
   getDisplayName,
   postDisplayName,
   getRepos,
-  postRepos
+  postRepos,
+  getRepoIpfs
 } from "../controllers/db.controller"
 
 const router = express.Router({mergeParams: true})
@@ -13,6 +14,8 @@ router.post("/profile/display_name", postDisplayName)
 
 router.get("/profile/repos", getRepos)
 router.post("/profile/repos", postRepos)
+
+router.get("/profile/repoIPFS", getRepoIpfs)
 
 export {
   router as dbRouter
