@@ -7,3 +7,21 @@
   @apply border-0 border-b-2 border-gray-200;
   flex: 0 0 60px;
 }
+
+.DaoRow {
+  @apply flex flex-col p-4;
+  @apply border-0 border-b-2 border-gray-200;
+  @apply cursor-pointer hover:opacity-75;
+}
+
+.DaoContainer {
+  @apply flex flex-col gap-4 mt-4;
+}
+
+.RepoName {
+  @apply text-2xl font-bold;
+}
+
+.Owner {
+  @apply text-sm text-gray-500;
+}

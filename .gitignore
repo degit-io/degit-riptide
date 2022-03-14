@@ -254,3 +254,5 @@ target/
 *.pdb
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,node,rust
+
+test-*/

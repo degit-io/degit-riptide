@@ -1,8 +1,8 @@
 [package]
-name = "degit"
+name = "degit-dao"
 version = "0.1.0"
 edition = "2021"
-description = "Decentralized git repositories"
+description = "Degit: DAO program"
 
 [features]
 no-entrypoint = []
@@ -17,5 +17,5 @@ solana-program-test = "=1.7.9"
 solana-sdk = "=1.7.9"
 
 [lib]
-name = "degit"
+name = "dao"
 crate-type = ["cdylib", "lib"]

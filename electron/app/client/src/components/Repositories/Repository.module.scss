@@ -44,6 +44,12 @@
   @apply font-normal text-base;
 }
 
+.DAOButton {
+  @apply ml-auto p-2;
+  @apply bg-yellow-400;
+  @apply rounded-full shadow-md cursor-pointer hover:opacity-75 duration-200;
+}
+
 .OptionBar {
   flex: 0 0 64px;
   @apply flex flex-row justify-start items-center gap-10;

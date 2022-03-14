@@ -1,0 +1,23 @@
+{
+  "name": "solana.mint-token",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-token": "tsc && node dist/main.js job=CreateToken",
+    "mint-token": "tsc && node dist/main.js job=MintToken"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.2.0",
+    "@solana/web3.js": "^1.36.0",
+    "tslog": "^3.3.2"
+  }
+}

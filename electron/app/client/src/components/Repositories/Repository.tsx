@@ -6,10 +6,16 @@ import {Settings} from "./Settings"
 import {Tree} from "./Tree"
 import {Blob} from "./Blob"
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined"
+import React, {useContext} from "react"
+import {AppConfig} from "../../config/Config"
+import {AuthContext} from "../../contexts/auth"
+import {HelperContext} from "../../contexts/Helper.context"
 
 export const Repository = () => {
   const {publicKey, repoId} = useParams()
   const location = useLocation()
+  const {keypair} = useContext(AuthContext)
+  const {setOpenSnack, setSnackMessage, setIsShowProgressBar} = useContext(HelperContext)
   if (!repoId || !publicKey) {
     return (
       <h1>Invalid repository</h1>
@@ -28,6 +34,40 @@ export const Repository = () => {
   const isOnContents = !isOnProposals && !isOnIssues
   const contentsClass = isOnContents ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
 
+  const onClickMakeDAO = () => {
+    if (!keypair) {
+      setOpenSnack(true)
+      setSnackMessage("You need to be logged in to create a DAO")
+      return
+    }
+
+    setIsShowProgressBar(true)
+
+    fetch(`${AppConfig.metaUrl}/solana/dao`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          privateKey: Array.from(keypair.secretKey),
+          repoName: repoId,
+        }),
+      }
+    ).then((res: Response) => {
+      setOpenSnack(true)
+      if (res.ok) {
+        setSnackMessage("Successfully created DAO")
+      } else {
+        setSnackMessage("Failed to create DAO")
+      }
+      setIsShowProgressBar(false)
+    }).catch(() => {
+      setOpenSnack(true)
+      setSnackMessage("Something went wrong")
+      setIsShowProgressBar(false)
+    })
+  }
+
   return (
     <div className={styles.Container}>
       <div className={styles.Header}>
@@ -43,13 +83,11 @@ export const Repository = () => {
         </div>
 
         <div className={styles.StatusRow}>
+          <div className={styles.DAOButton} onClick={onClickMakeDAO}>
+            Make DAO
+          </div>
           <div className={styles.StatusColumn}>
             <div className={styles.StatusKey}>STAR</div>
-            <div className={styles.StatusValue}>0</div>
-          </div>
-
-          <div className={styles.StatusColumn}>
-            <div className={styles.StatusKey}>VIEWS</div>
             <div className={styles.StatusValue}>0</div>
           </div>
         </div>

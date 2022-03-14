@@ -11,3 +11,15 @@
   @apply flex-grow;
   @apply overflow-auto;
 }
+
+.ProgressBar {
+  @apply absolute top-0 w-full;
+}
+
+.ColorPrimary {
+  @apply bg-yellow-500;
+}
+
+.BarColorPrimary {
+  @apply bg-yellow-200;
+}

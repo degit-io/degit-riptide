@@ -4,14 +4,17 @@ import {metaRouter} from "./routes/meta.route"
 import {Config} from "../config"
 import {infoRouter} from "./routes/info.route"
 import {nonInfoRouter} from "./routes/noninfo.route"
+import {solanaRouter} from "./routes/solana.route"
 import cors from "cors"
 import {dbRouter} from "./routes/db.route"
 import * as IPFS from "ipfs"
 import OrbitDB from "orbit-db"
+import {Connection} from "@solana/web3.js"
 
 let ipfs: IPFS.IPFS
 let orbitdb: any
 let profile: any
+let solana: Connection
 
 export const initMetaServer = (): Express => {
   const server = express()
@@ -20,7 +23,8 @@ export const initMetaServer = (): Express => {
   server.use(express.json())
   server.use("/meta", metaRouter)
   server.use("/db", dbRouter)
-  server.use("/", (req, res) => res.end("Meta server OK"))
+  server.use("/solana", solanaRouter)
+  server.use("/", (req, res) => res.end("Meta OK"))
   return server
 }
 
@@ -30,7 +34,7 @@ export const initGitServer = (): Express => {
   server.use(express.raw({type: "*/*"}))
   server.use("/:repository/info", infoRouter)
   server.use("/:repository", nonInfoRouter)
-  server.use("/", (req, res) => res.end("OK"))
+  server.use("/", (req, res) => res.end("Git OK"))
   return server
 }
 
@@ -52,9 +56,15 @@ const testServer = async () => {
   )
   await profile.load()
 
+  solana = new Connection(
+    "http://localhost:8899",
+    "confirmed"
+  )
+
   const metaServer = initMetaServer()
   metaServer.set("orbitdb", orbitdb)
   metaServer.set("profile", profile)
+  metaServer.set("solana", solana)
   metaServer.listen(Config.META_SERVER_PORT)
 
   const gitServer = initGitServer()
