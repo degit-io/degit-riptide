@@ -3,6 +3,7 @@ import {spawn} from "child_process"
 import * as fs from "fs"
 import * as IPFS from "ipfs"
 import {getDegitDir, getFullPath, getPublicKey} from "../utils"
+import path from "path"
 
 const downloadGitBundleFromIPFS = async (req: Request,
                                          repoId: string,
@@ -17,12 +18,20 @@ const downloadGitBundleFromIPFS = async (req: Request,
 
   const record = await db.get(`${repoId}.git`)
   const ipfsRef = record.ipfs
+
   const ipfs: IPFS.IPFS = req.app.get("ipfs")
   const chunks: Uint8Array[] = []
   for await (const chunk of ipfs.cat(ipfsRef)) {
     chunks.push(chunk)
   }
   const concat = Buffer.concat(chunks)
+
+  // Create directory if not exists
+  const dir = path.join(getDegitDir(), publicKey)
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir)
+  }
+
   fs.writeFileSync(`${fullPath}.bundle`, concat)
   const unbundle = spawn(
     `cd ${getDegitDir()}/${publicKey} && git clone ${fullPath}.bundle && rm ${fullPath}.bundle`,

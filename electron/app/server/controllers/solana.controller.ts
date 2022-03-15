@@ -15,14 +15,16 @@ import {Config} from "../../config"
 import {getOrCreateAssociatedTokenAccount, getAssociatedTokenAddress} from "@solana/spl-token"
 
 class RepoAccount {
-  git_ref: string
   quorum: number
   owner: string
+  orbit_id: string
+  repo_name: string
 
   constructor(args: any) {
-    this.git_ref = args.git_ref
     this.quorum = args.quorum
     this.owner = args.owner
+    this.orbit_id = args.orbit_id
+    this.repo_name = args.repo_name
   }
 }
 
@@ -32,9 +34,10 @@ const RepoAccountSchema = new Map([
     {
       kind: "struct",
       fields: [
-        ["git_ref", "string"],
         ["quorum", "u8"],
-        ["owner", "string"]
+        ["owner", "string"],
+        ["orbit_id", "string"],
+        ["repo_name", "string"]
       ]
     }
   ],
@@ -134,18 +137,19 @@ export const postDAO = async (req: Request, res: Response) => {
   let solana: Connection
   let keypair: Keypair
   let repoName: string
+  let orbitId: string
   let quorum: number
   try {
     solana = req.app.get("solana")
     const privateKey: Uint8Array = Uint8Array.from(req.body.privateKey)
     keypair = Keypair.fromSecretKey(privateKey)
     repoName = req.body.repoName
+    orbitId = req.body.orbitId
     quorum = req.body.quorum || 0
   } catch (e) {
-    res.status(500).send({
+    res.status(400).json({
       "success": false,
-      "error": e,
-      "msg": "Failed to parse the body / query parameters"
+      "error": e.message,
     })
     return
   }
@@ -159,26 +163,33 @@ export const postDAO = async (req: Request, res: Response) => {
       Config.DAO_PROGRAM_ID
     )
   } catch (e) {
-    res.status(500).send({"success": false, "error": e})
+    res.status(500).json({"success": false, "error": e.message})
     return
   }
 
   // Get minimum rent
   const data = new RepoAccount(
     {
-      git_ref: repoName,
       quorum: quorum,
-      owner: keypair.publicKey.toBase58()
+      owner: keypair.publicKey.toBase58(),
+      repo_name: repoName,
+      orbit_id: orbitId,
     }
   )
-  const serialized = await borsh.serialize(RepoAccountSchema, data)
+  const serialized = await borsh.serialize(
+    RepoAccountSchema,
+    data
+  )
 
   // Check if account exists
   let accountExists: boolean
   try {
-    accountExists = await checkIfAccountExists(solana, programAccountPublicKey)
+    accountExists = await checkIfAccountExists(
+      solana,
+      programAccountPublicKey
+    )
   } catch (e) {
-    res.status(500).send({"success": false, "error": e})
+    res.status(500).json({"success": false, "error": e.message})
     return
   }
 
@@ -194,7 +205,7 @@ export const postDAO = async (req: Request, res: Response) => {
         repoName
       )
     } catch (e) {
-      res.status(500).send({"success": false, "error": e})
+      res.status(500).json({"success": false, "error": e.message})
       return
     }
     transaction.add(createAccountInstruction)
@@ -222,7 +233,7 @@ export const postDAO = async (req: Request, res: Response) => {
       [keypair]
     )
   } catch (e) {
-    res.status(500).send({"success": false, "error": e})
+    res.status(500).json({"success": false, "error": e.message})
     return
   }
 

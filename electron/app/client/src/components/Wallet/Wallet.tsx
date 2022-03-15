@@ -37,12 +37,26 @@ export const Wallet = (props: WalletProps) => {
     await navigator.clipboard.writeText(publicKey)
   }
 
+  const notifyDeleteDegitDirPublicKey = () => {
+    if (keypair === undefined) {
+      return
+    }
+    fetch(`${AppConfig.metaUrl}/db/profile/publicKey`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      }
+    ).then()
+  }
+
   const onSignOut = async () => {
     await openLogin.init()
     await openLogin.logout()
     localStorage.removeItem("privKey")
     setKeypair(undefined)
     setIsAuthenticated(false)
+    notifyDeleteDegitDirPublicKey()
     handleClose()
   }
 

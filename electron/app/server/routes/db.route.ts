@@ -5,7 +5,9 @@ import {
   getRepos,
   postRepos,
   getRepoIpfs,
-  getProfile
+  getProfile,
+  postPublicKey,
+  deletePublicKey
 } from "../controllers/db.controller"
 
 const router = express.Router({mergeParams: true})
@@ -18,6 +20,8 @@ router.get("/profile/repos", getRepos)
 router.post("/profile/repos", postRepos)
 
 router.get("/profile/repoIPFS", getRepoIpfs)
+router.post("/profile/publicKey", postPublicKey)
+router.delete("/profile/publicKey", deletePublicKey)
 
 export {
   router as dbRouter

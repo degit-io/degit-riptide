@@ -2,9 +2,11 @@ import styles from "./Explore.module.scss"
 import {useContext, useEffect, useState} from "react"
 import {AppConfig} from "../../config/Config"
 import {HelperContext} from "../../contexts/Helper.context"
+import {Link} from "react-router-dom"
 
 interface Dao {
-  git_ref: string
+  repo_name: string
+  orbit_id: string
   owner: string
   quorum: number
 }
@@ -16,7 +18,11 @@ interface DaoResponse {
 
 export const Explore = () => {
   const [daos, setDaos] = useState<Dao[]>([])
-  const {setIsShowProgressBar, setOpenSnack, setSnackMessage} = useContext(HelperContext)
+  const {
+    setIsShowProgressBar,
+    setOpenSnack,
+    setSnackMessage
+  } = useContext(HelperContext)
 
   useEffect(() => {
     setIsShowProgressBar(true)
@@ -48,11 +54,15 @@ export const Explore = () => {
 
   const getDaoRow = () => {
     return daos.map((dao: Dao) => {
+      const linkKey= `${dao.orbit_id}/${dao.owner}/${dao.repo_name}`
       return (
-        <div className={styles.DaoRow}>
-          <div className={styles.RepoName}>{dao.git_ref}</div>
+        <Link className={styles.DaoRow}
+              to={`/repos/${linkKey}`}
+              key={linkKey}
+        >
+          <div className={styles.RepoName}>{dao.repo_name}</div>
           <div className={styles.Owner}>Created By {dao.owner}</div>
-        </div>
+        </Link>
       )
     })
   }

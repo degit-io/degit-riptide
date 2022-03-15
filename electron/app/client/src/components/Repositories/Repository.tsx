@@ -36,7 +36,7 @@ export const Repository = () => {
   const contentsClass = isOnContents ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
 
   const onClickMakeDAO = () => {
-    if (!keypair) {
+    if (keypair === undefined) {
       setOpenSnack(true)
       setSnackMessage("You need to be logged in to create a DAO")
       return
@@ -52,17 +52,19 @@ export const Repository = () => {
         body: JSON.stringify({
           privateKey: Array.from(keypair.secretKey),
           repoName: repoId,
+          orbitId,
         }),
       }
-    ).then((res: Response) => {
-      setOpenSnack(true)
-      if (res.ok) {
-        setSnackMessage("Successfully created DAO")
-      } else {
-        setSnackMessage("Failed to create DAO")
-      }
-      setIsShowProgressBar(false)
-    }).catch(() => {
+    ).then(res => res.json())
+      .then((res: any) => {
+        setOpenSnack(true)
+        if (res.success) {
+          setSnackMessage("Successfully created DAO")
+        } else {
+          setSnackMessage("Failed to create DAO")
+        }
+        setIsShowProgressBar(false)
+      }).catch(() => {
       setOpenSnack(true)
       setSnackMessage("Something went wrong")
       setIsShowProgressBar(false)
@@ -84,9 +86,15 @@ export const Repository = () => {
         </div>
 
         <div className={styles.StatusRow}>
-          <div className={styles.DAOButton} onClick={onClickMakeDAO}>
-            Make DAO
-          </div>
+          {
+            keypair?.publicKey.toBase58() === publicKey
+              ?
+              <div className={styles.DAOButton} onClick={onClickMakeDAO}>
+                Make DAO
+              </div>
+              :
+              null
+          }
           <div className={styles.StatusColumn}>
             <div className={styles.StatusKey}>STAR</div>
             <div className={styles.StatusValue}>0</div>

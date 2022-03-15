@@ -5,6 +5,7 @@ import {AuthContext} from "../../contexts/auth"
 import {getED25519Key} from "@toruslabs/openlogin-ed25519"
 import {Keypair} from "@solana/web3.js"
 import {HelperContext} from "../../contexts/Helper.context"
+import {AppConfig} from "../../config/Config"
 
 interface SelectProviderProps {
   open: boolean
@@ -27,6 +28,19 @@ export const SelectProvider = (props: SelectProviderProps) => {
     props.onClose()
   }
 
+  const notifyUpdateDegitDirPublicKey = (keypair: Keypair) => {
+    fetch(`${AppConfig.metaUrl}/db/profile/publicKey`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          publicKey: keypair.publicKey.toBase58(),
+        }),
+      }
+    ).then()
+  }
+
   const onClickWeb3Auth = async () => {
     await openLogin.init()
     handleClose()
@@ -36,6 +50,7 @@ export const SelectProvider = (props: SelectProviderProps) => {
       const keypair = Keypair.fromSecretKey(sk)
       setKeypair(keypair)
       setIsAuthenticated(true)
+      notifyUpdateDegitDirPublicKey(keypair)
     }
   }
 
@@ -48,6 +63,7 @@ export const SelectProvider = (props: SelectProviderProps) => {
     setIsKeypairGenerated(true)
     setKeypair(keypair)
     setIsAuthenticated(true)
+    notifyUpdateDegitDirPublicKey(keypair)
   }
 
   const onImportKeypair = async () => {

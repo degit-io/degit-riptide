@@ -65,7 +65,7 @@ export const Tree = ({repoId, orbitId, publicKey}: TreeProps) => {
       if (dirName !== undefined) {
         api = `${api}/${dirName}`
       }
-      api = `${api}README.md`
+      api = `${api}README.md?publicKey=${publicKey}&orbitId=${orbitId}`
       fetch(api)
         .then(res => res.json())
         .then((res: BlobResponse) => {

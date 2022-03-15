@@ -41,6 +41,19 @@ const App = () => {
     )
   }
 
+  const notifyUpdateDegitDirPublicKey = (keypair: Keypair) => {
+    fetch(`${AppConfig.metaUrl}/db/profile/publicKey`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          publicKey: keypair.publicKey.toBase58(),
+        }),
+      }
+    ).then()
+  }
+
   useEffect(() => {
     openLogin
       .init()
@@ -52,9 +65,11 @@ const App = () => {
             const privKey = localStorage.getItem("privKey")
             if (privKey) {
               const parsed = JSON.parse(privKey)
-              setKeypair(Keypair.fromSecretKey(Buffer.from(parsed)))
+              const keypair = Keypair.fromSecretKey(Buffer.from(parsed))
+              setKeypair(keypair)
               setIsAuthenticated(true)
               setIsLoaded(true)
+              notifyUpdateDegitDirPublicKey(keypair)
             }
             return
           }
@@ -63,6 +78,7 @@ const App = () => {
           setKeypair(keypair)
           setIsAuthenticated(true)
           setIsLoaded(true)
+          notifyUpdateDegitDirPublicKey(keypair)
         }
       )
   }, [])

@@ -5,13 +5,15 @@ use solana_program::{
   entrypoint::ProgramResult,
   program_error::ProgramError,
   pubkey::Pubkey,
+  msg,
 };
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct InstructionData {
-  pub git_ref: String,
   pub quorum: u8,
-  pub owner: String
+  pub owner: String,
+  pub orbit_id: String,
+  pub repo_name: String,
 }
 
 entrypoint!(process_instruction);
@@ -37,11 +39,11 @@ pub fn process_instruction(
 
   // Transform the instruction data into InstructionData
   let parsed: InstructionData = InstructionData::try_from_slice(&instruction_data)?;
+  msg!("Parsed: {:?}", parsed);
 
-  // Confirm the repository owner (which is the signer) is the owner of the repository
   let derived_pub_key = Pubkey::create_with_seed(
     repo_owner_account.key,
-    &parsed.git_ref,
+    &parsed.repo_name,
     program_id,
   )?;
   if derived_pub_key != *program_account.key {

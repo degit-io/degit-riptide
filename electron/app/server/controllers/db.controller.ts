@@ -1,4 +1,7 @@
 import {Request, Response} from "express"
+import fs from "fs"
+import path from "path"
+import {getDegitDir} from "../utils"
 
 export const getRepos = async (req: Request, res: Response) => {
   const publicKey = req.query.publicKey
@@ -145,4 +148,23 @@ export const getProfile = async (req: Request, res: Response) => {
   } catch (e) {
     res.status(500).json({success: false, error: e.message})
   }
+}
+
+export const postPublicKey = async (req: Request, res: Response) => {
+  const publicKey = req.body.publicKey
+  if (!publicKey) {
+    res.status(400).json({error: "Missing publicKey"})
+    return
+  }
+  const filePath = path.join(getDegitDir(), "publicKey")
+  fs.writeFileSync(filePath, publicKey)
+  res.json({success: true})
+}
+
+export const deletePublicKey = async (req: Request, res: Response) => {
+  const filePath = path.join(getDegitDir(), "publicKey")
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath)
+  }
+  res.json({success: true})
 }
