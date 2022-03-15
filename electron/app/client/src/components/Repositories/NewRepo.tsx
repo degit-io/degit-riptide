@@ -1,8 +1,5 @@
 import styles from "./NewRepo.module.scss"
 import {useContext, useState} from "react"
-import Snackbar from "@mui/material/Snackbar"
-import IconButton from "@mui/material/IconButton"
-import CloseIcon from "@mui/icons-material/Close"
 import {AppConfig} from "../../config/Config"
 import {useNavigate} from "react-router-dom"
 import {AuthContext} from "../../contexts/auth"

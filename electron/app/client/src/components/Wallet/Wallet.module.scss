@@ -1,6 +1,4 @@
 .Container {
-  width: 450px;
-  height: 650px;
   @apply flex flex-col justify-start items-stretch;
 }
 
@@ -20,6 +18,11 @@
 
 .PublicKey {
   @apply text-xs;
+}
+
+.ExportButton {
+  @apply bg-yellow-500 text-white py-1 px-2 rounded-md;
+  @apply cursor-pointer hover:opacity-75;
 }
 
 .ContentCopyIcon {
@@ -45,12 +48,47 @@
   @apply cursor-pointer hover:opacity-75;
 }
 
-.Network {
-  @apply p-4 mt-auto;
-  @apply border-0 border-t-2 border-gray-100;
-}
-
 .Separator {
   @apply h-0.5;
   @apply bg-gray-100 mt-8;
+}
+
+.BottomRow {
+  @apply p-4 mt-auto;
+  @apply border-0 border-t-2 border-gray-100;
+  @apply flex flex-row items-center;
+}
+
+.Network {
+  @apply text-gray-400;
+}
+
+.SignOutButton {
+  @apply ml-auto pt-1 pb-1 pl-4 pr-4;
+  @apply bg-red-500 text-white font-bold;
+  @apply rounded-md cursor-pointer hover:opacity-75;
+}
+
+.SendSolanaContainer {
+  @apply flex flex-col p-4 gap-4;
+}
+
+.SendSolanaRow {
+  @apply flex flex-row gap-4;
+}
+
+.SendSolanaInput {
+  @apply w-64;
+  @apply bg-gray-100 pl-2 pr-2;
+  @apply border-2 border-gray-200 rounded-md;
+  @apply focus:border-yellow-500;
+  &:focus {
+    outline: none;
+  }
+}
+
+.ConfirmSendSolanaButton {
+  @apply bg-yellow-500 text-white text-center font-bold;
+  @apply rounded-md shadow-lg py-1 mt-4;
+  @apply cursor-pointer hover:opacity-75;
 }

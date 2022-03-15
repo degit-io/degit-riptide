@@ -23,6 +23,7 @@ export const Repositories = () => {
 
   useEffect(() => {
     if (keypair === undefined) {
+      setIsLoaded(true)
       return
     }
 
@@ -107,13 +108,28 @@ export const Repositories = () => {
     )
   }
 
+  const createNotSignInContainer = () => {
+    return (
+      <div className={styles.NotSignInContainer}>
+        <div className={styles.NotSignInImg}>
+          <img src={repoEmptyImg} alt="No repository"/>
+        </div>
+        <div className={styles.NotSignInText}>
+          Create a wallet to start
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.Container}>
       {
         isLoaded ?
-          repos.length === 0
-            ? createNoReposContainer()
-            : createRepoListContainer()
+          keypair === undefined
+            ? createNotSignInContainer()
+            : repos.length === 0
+              ? createNoReposContainer()
+              : createRepoListContainer()
           : null
       }
     </div>

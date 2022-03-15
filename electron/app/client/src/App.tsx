@@ -21,7 +21,6 @@ const App = () => {
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
   const [openSnack, setOpenSnack] = useState(false)
   const [isShowProgressBar, setIsShowProgressBar] = useState(false)
-
   const openLogin = new OpenLogin({
     clientId: AppConfig.openLoginClientId,
     network: AppConfig.openLoginNetwork,
@@ -49,6 +48,14 @@ const App = () => {
         () => {
           const privKey = openLogin.privKey
           if (!privKey) {
+            // Check local storage
+            const privKey = localStorage.getItem("privKey")
+            if (privKey) {
+              const parsed = JSON.parse(privKey)
+              setKeypair(Keypair.fromSecretKey(Buffer.from(parsed)))
+              setIsAuthenticated(true)
+              setIsLoaded(true)
+            }
             return
           }
           const {sk} = getED25519Key(privKey)
@@ -68,7 +75,8 @@ const App = () => {
           isAuthenticated,
           setIsAuthenticated,
           keypair,
-          setKeypair
+          setKeypair,
+          openLogin
         }}
       >
         <HelperContext.Provider value={{

@@ -62,3 +62,16 @@
   @apply cursor-pointer hover:opacity-75 duration-200;
   @apply shadow-lg;
 }
+
+.NotSignInContainer {
+  @apply flex flex-col justify-center items-center gap-16;
+  @apply h-full;
+}
+
+.NotSignInImg {
+  @apply w-64;
+}
+
+.NotSignInText {
+  @apply text-2xl font-bold;
+}

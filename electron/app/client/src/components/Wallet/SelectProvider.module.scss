@@ -1,0 +1,15 @@
+.Container {
+  width: 50vw;
+  height: 50vh;
+  max-width: 450px;
+  min-height: 450px;
+  @apply flex flex-col justify-center items-center gap-8;
+}
+
+.Button {
+  @apply w-64 h-12;
+  @apply bg-yellow-500 text-white font-bold text-center;
+  @apply rounded-md shadow-md;
+  @apply flex items-center justify-center;
+  @apply cursor-pointer hover:opacity-75 duration-200;
+}

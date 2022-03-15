@@ -3,8 +3,6 @@ import {AuthContext} from "../contexts/auth"
 import OpenLogin from "@toruslabs/openlogin"
 import {AppConfig} from "../config/Config"
 import {Link, useLocation} from "react-router-dom"
-import {getED25519Key} from "@toruslabs/openlogin-ed25519"
-import {Keypair} from "@solana/web3.js"
 import logo from "../assets/logo.png"
 import SourceOutlinedIcon from '@mui/icons-material/SourceOutlined';
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined"
@@ -13,6 +11,7 @@ import TravelExploreOutlinedIcon from "@mui/icons-material/TravelExploreOutlined
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import {Wallet} from "./Wallet/Wallet"
 import styles from "./Menu.module.scss"
+import {SelectProvider} from "./Wallet/SelectProvider"
 
 export const Menu = () => {
   const {isAuthenticated, setIsAuthenticated, setKeypair} = useContext(AuthContext)
@@ -26,24 +25,16 @@ export const Menu = () => {
   const pathName = location.pathname
 
   const onClickWallet = async () => {
-    if (!isAuthenticated) {
-      await openLogin.init()
-      const {privKey} = await openLogin.login()
-      if (privKey) {
-        const {sk} = getED25519Key(privKey)
-        const keypair = Keypair.fromSecretKey(sk)
-        setKeypair(keypair)
-        setIsAuthenticated(true)
-      }
-    } else {
-      // Show wallet as overlay
-      setOpenWallet(true)
-    }
+    setOpenWallet(true)
   }
 
   return (
     <div className={styles.MenuContainer}>
-      <Wallet open={openWallet} onClose={() => setOpenWallet(false)}/>
+      {
+        isAuthenticated
+          ? <Wallet open={openWallet} onClose={() => setOpenWallet(false)}/>
+          : <SelectProvider open={openWallet} onClose={() => setOpenWallet(false)}/>
+      }
 
       <div className={styles.Logo}>
         <img src={logo} alt="Degit Logo"/>

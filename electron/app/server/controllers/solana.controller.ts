@@ -1,7 +1,7 @@
 import {Request, Response} from "express"
 import {
   Connection,
-  Keypair,
+  Keypair, LAMPORTS_PER_SOL,
   PublicKey,
   sendAndConfirmTransaction,
   SystemProgram,
@@ -325,6 +325,70 @@ export const postInvest = async (req: Request, res: Response) => {
     transaction,
     [keypair]
   )
+
+  res.json({"success": true})
+}
+
+export const postAirdrop = async (req: Request, res: Response) => {
+  const solana: Connection = req.app.get("solana")
+  const publicKey = req.body.publicKey
+  if (!publicKey) {
+    res.status(400).send({"success": false, "error": "Missing public key"})
+    return
+  }
+  try {
+    const airdropSignature = await solana.requestAirdrop(
+      new PublicKey(publicKey),
+      LAMPORTS_PER_SOL
+    )
+    await solana.confirmTransaction(airdropSignature)
+  } catch (e) {
+    res.status(500).send({"success": false, "error": e})
+    return
+  }
+
+  res.json({"success": true})
+}
+
+export const postSendSol = async (req: Request, res: Response) => {
+  const solana: Connection = req.app.get("solana")
+  const fromPublicKey = req.body.fromPublicKey
+  const toPublicKey = req.body.toPublicKey
+  const signerPrivKey = req.body.signerPrivKey
+  const amount = req.body.amount
+
+  if (!fromPublicKey || !toPublicKey || !signerPrivKey || !amount) {
+    res
+      .status(400)
+      .send({"success": false, "error": "Missing required fields"})
+    return
+  }
+
+  let transferInstruction: TransactionInstruction
+  try {
+    transferInstruction = SystemProgram.transfer({
+      fromPubkey: new PublicKey(fromPublicKey),
+      toPubkey: new PublicKey(toPublicKey),
+      lamports: Number(amount) * LAMPORTS_PER_SOL
+    })
+  } catch (e) {
+    res.status(500).send({"success": false, "error": e.toString()})
+    return
+  }
+
+  const transaction = new Transaction()
+  transaction.add(transferInstruction)
+
+  try {
+    await sendAndConfirmTransaction(
+      solana,
+      transaction,
+      [Keypair.fromSecretKey(Buffer.from(signerPrivKey))]
+    )
+  } catch (e) {
+    res.status(500).send({"success": false, "error": e.toString()})
+    return
+  }
 
   res.json({"success": true})
 }

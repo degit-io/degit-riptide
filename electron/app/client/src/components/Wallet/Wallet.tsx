@@ -3,8 +3,9 @@ import styles from "./Wallet.module.scss"
 import {useContext, useEffect, useState} from "react"
 import {AuthContext} from "../../contexts/auth"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
-import {Connection} from "@solana/web3.js"
+import {Connection, LAMPORTS_PER_SOL} from "@solana/web3.js"
 import {AppConfig} from "../../config/Config"
+import {HelperContext} from "../../contexts/Helper.context"
 
 interface WalletProps {
   open: boolean
@@ -12,10 +13,19 @@ interface WalletProps {
 }
 
 export const Wallet = (props: WalletProps) => {
-  const [network, setNetwork] = useState("local")
+  const [network, setNetwork] = useState("devnet")
   const [solBalance, setSolBalance] = useState(0)
   const [degBalance, setDegBalance] = useState(0)
-  const {keypair} = useContext(AuthContext)
+  const [isSendSol, setIsSendSol] = useState(false)
+  const [sendSolPubKey, setSendSolPubKey] = useState("")
+  const [sendSolAmount, setSendSolAmount] = useState("")
+  const {
+    keypair,
+    openLogin,
+    setKeypair,
+    setIsAuthenticated
+  } = useContext(AuthContext)
+  const {setOpenSnack, setSnackMessage} = useContext(HelperContext)
 
   const publicKey = keypair?.publicKey.toBase58() || "Error when decoding public key"
 
@@ -27,12 +37,125 @@ export const Wallet = (props: WalletProps) => {
     await navigator.clipboard.writeText(publicKey)
   }
 
+  const onSignOut = async () => {
+    await openLogin.init()
+    await openLogin.logout()
+    localStorage.removeItem("privKey")
+    setKeypair(undefined)
+    setIsAuthenticated(false)
+    handleClose()
+  }
+
+  const onExportPrivateKey = async () => {
+    if (keypair === undefined) {
+      return
+    }
+    const privKey = Array.from(keypair.secretKey)
+
+    // Download as JSON
+    const blob = new Blob(
+      [JSON.stringify(privKey)],
+      {type: "application/json"}
+    )
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "private_key.json"
+    document.body.appendChild(link)
+    link.click()
+  }
+
+  const onAirDrop = async () => {
+    if (keypair === undefined) {
+      return
+    }
+    fetch(`${AppConfig.metaUrl}/solana/airdrop`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        publicKey: keypair.publicKey.toBase58()
+      })
+    })
+      .then(res => {
+          setOpenSnack(true)
+          if (!res.ok) {
+            setSnackMessage("Request airdrop failed")
+            return
+          }
+          setSnackMessage("Airdrop success")
+        }
+      )
+  }
+
+  const onSendSolana = async () => {
+    setIsSendSol(true)
+  }
+
+  const onUpdateSendSolanaPubKey = (e: any) => {
+    setSendSolPubKey(e.target.value)
+  }
+
+  const onUpdateSendSolanaAmount = (e: any) => {
+    setSendSolAmount(e.target.value)
+  }
+
+  const onConfirmSendSolana = () => {
+    if (!sendSolPubKey || !sendSolAmount) {
+      setOpenSnack(true)
+      setSnackMessage("Please fill all fields")
+      return
+    }
+
+    const amount = Number(sendSolAmount)
+    if (!amount) {
+      setOpenSnack(true)
+      setSnackMessage("Invalid amount")
+      return
+    }
+
+    if (keypair === undefined) {
+      setOpenSnack(true)
+      setSnackMessage("Something went wrong. Please refresh.")
+      return
+    }
+
+    fetch(`${AppConfig.metaUrl}/solana/send_sol`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        fromPublicKey: keypair.publicKey.toBase58(),
+        toPublicKey: sendSolPubKey,
+        signerPrivKey: Array.from(keypair.secretKey),
+        amount
+      })
+    })
+      .then(res => {
+          if (!res.ok) {
+            res.json().then(data => {
+              setOpenSnack(true)
+              setSnackMessage(`Transfer failed - ${data.error}`)
+            })
+            return
+          }
+          setOpenSnack(true)
+          setSnackMessage("Transfer success")
+        }
+      )
+  }
+
   useEffect(() => {
     if (props.open) {
+      if (keypair === undefined) {
+        return
+      }
       const getBalance = async () => {
         const connection = new Connection(AppConfig.rpcUrl)
         const balance = await connection.getBalance(keypair!.publicKey)
-        const roundedBalance = (balance / 1000000000).toFixed(4)
+        const roundedBalance = (balance / LAMPORTS_PER_SOL).toFixed(4)
         setSolBalance(parseFloat(roundedBalance))
       }
       getBalance().then()
@@ -53,6 +176,11 @@ export const Wallet = (props: WalletProps) => {
                              onClick={handleCopy}
             />
           </div>
+          <div className={styles.ExportButton}
+               onClick={onExportPrivateKey}
+          >
+            Export Private Key
+          </div>
         </div>
 
         <div className={styles.Balance}>
@@ -60,8 +188,8 @@ export const Wallet = (props: WalletProps) => {
         </div>
 
         <div className={styles.ActionRow}>
-          <div className={styles.ActionButton}>Deposit</div>
-          <div className={styles.ActionButton}>Send</div>
+          <div className={styles.ActionButton} onClick={onAirDrop}>Airdrop</div>
+          <div className={styles.ActionButton} onClick={onSendSolana}>Send</div>
         </div>
 
         <div className={styles.Separator}>
@@ -71,16 +199,33 @@ export const Wallet = (props: WalletProps) => {
           {degBalance} DEG
         </div>
 
-        <div className={styles.ActionRow}>
-          <div className={styles.ActionButton}>Deposit</div>
-          <div className={styles.ActionButton}>Send</div>
-        </div>
+        <div className={styles.BottomRow}>
+          <div className={styles.Network}>
+            Network: {network}
+          </div>
 
-        <div className={styles.Network}>
-          Network: {network}
+          <div className={styles.SignOutButton} onClick={onSignOut}>
+            SIGN OUT
+          </div>
         </div>
 
       </div>
+
+      <Dialog open={isSendSol}
+              onClose={() => setIsSendSol(false)}>
+        <div className={styles.SendSolanaContainer}>
+          <div>Recipient Public Key</div>
+          <input className={styles.SendSolanaInput} onChange={onUpdateSendSolanaPubKey}/>
+          <div>Amount</div>
+          <input className={styles.SendSolanaInput} onChange={onUpdateSendSolanaAmount}/>
+          <div className={styles.ConfirmSendSolanaButton}
+               onClick={onConfirmSendSolana}
+          >
+            Confirm
+          </div>
+        </div>
+      </Dialog>
+
     </Dialog>
   )
 }
