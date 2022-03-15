@@ -4,11 +4,13 @@ import {
   postDisplayName,
   getRepos,
   postRepos,
-  getRepoIpfs
+  getRepoIpfs,
+  getProfile
 } from "../controllers/db.controller"
 
 const router = express.Router({mergeParams: true})
 
+router.get("/profile", getProfile)
 router.get("/profile/display_name", getDisplayName)
 router.post("/profile/display_name", postDisplayName)
 

@@ -57,3 +57,23 @@
 .EditDisplayNameIcon {
   @apply cursor-pointer;
 }
+
+.EditNameContainer {
+  @apply flex flex-col p-4 gap-4;
+}
+
+.EditNameInput {
+  @apply w-64;
+  @apply bg-gray-100 pl-2 pr-2;
+  @apply border-2 border-gray-200 rounded-md;
+  @apply focus:border-yellow-500;
+  &:focus {
+    outline: none;
+  }
+}
+
+.ConfirmEditNameButton {
+  @apply bg-yellow-500 text-white text-center font-bold;
+  @apply rounded-md shadow-lg py-1 mt-4;
+  @apply cursor-pointer hover:opacity-75;
+}

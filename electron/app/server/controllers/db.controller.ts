@@ -66,32 +66,83 @@ export const getRepoIpfs = async (req: Request, res: Response) => {
 
   let dbName: string
   if (orbitId) {
-    dbName = `/orbitdb/${orbitId}/${publicKey}.${repoId}`
+    dbName = `/orbitdb/${orbitId}/${publicKey}`
   } else {
-    dbName = `${publicKey}.${repoId}`
+    dbName = `${publicKey}`
   }
 
   const db = await orbitdb.keyvalue(dbName)
   await db.load()
-  const ipfsReference: string = await db.get("ipfs")
+  const repo = await db.get(repoId)
+  const ipfsReference = await repo?.get("ipfs")
   res.json({success: true, ipfs: ipfsReference})
 }
 
 export const getDisplayName = async (req: Request, res: Response) => {
-  const profile = req.app.get("profile")
-  await profile.load()
-  const displayName = await profile.get("displayName")
-  res.json({displayName})
+  const orbitdb = req.app.get("orbitdb")
+  const publicKey = req.query.publicKey
+  if (!publicKey) {
+    res.status(400).json({success: false, error: "Missing publicKey"})
+    return
+  }
+
+  const orbitId = req.query.orbitId
+  const dbName = orbitId ? `/orbitdb/${orbitId}/${publicKey}` : publicKey
+
+  try {
+    const db = await orbitdb.keyvalue(dbName)
+    await db.load()
+    const displayName = await db.get("displayName")
+    res.json({success: true, displayName})
+  } catch (e) {
+    res.status(500).json({success: false, error: e.message})
+  }
 }
 
 export const postDisplayName = async (req: Request, res: Response) => {
-  const profile = req.app.get("profile")
+  const orbitdb = req.app.get("orbitdb")
+  const publicKey = req.body.publicKey
+  if (!publicKey) {
+    res.status(400).json({error: "Missing publicKey"})
+    return
+  }
   const displayName = req.body.displayName
   if (!displayName) {
     res.status(400).json({error: "Display name is required"})
     return
   }
-  await profile.load()
-  await profile.put("displayName", displayName)
-  res.json({displayName})
+
+  const orbitId = req.body.orbitId
+  const dbName = orbitId ? `/orbitdb/${orbitId}/${publicKey}` : publicKey
+
+  try {
+    const db = await orbitdb.keyvalue(dbName)
+    await db.load()
+    await db.put("displayName", displayName)
+    res.json({success: true})
+  } catch (e) {
+    res.status(500).json({success: false, error: e.message})
+  }
+}
+
+export const getProfile = async (req: Request, res: Response) => {
+  const orbitdb = req.app.get("orbitdb")
+  const publicKey = req.query.publicKey
+  if (!publicKey) {
+    res.status(400).json({success: false, error: "Missing publicKey"})
+    return
+  }
+
+  const orbitId = req.query.orbitId
+  const dbName = orbitId ? `/orbitdb/${orbitId}/${publicKey}` : publicKey
+
+  try {
+    const db = await orbitdb.keyvalue(dbName)
+    await db.load()
+    const displayName = await db.get("displayName")
+    const repos = await db.get("repos")
+    res.json({success: true, displayName, repos})
+  } catch (e) {
+    res.status(500).json({success: false, error: e.message})
+  }
 }
