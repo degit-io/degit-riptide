@@ -66,11 +66,6 @@ export const SelectProvider = (props: SelectProviderProps) => {
     notifyUpdateDegitDirPublicKey(keypair)
   }
 
-  const onImportKeypair = async () => {
-    setOpenSnack(true)
-    setSnackMessage("Not Implemented")
-  }
-
   const showKeypairInfo = () => {
     if (keypair === undefined) {
       return null
@@ -95,7 +90,6 @@ export const SelectProvider = (props: SelectProviderProps) => {
             <>
               <div className={styles.Button} onClick={onClickWeb3Auth}>Create from Web3Auth</div>
               <div className={styles.Button} onClick={onGenerateKeypair}>Generate Keypair</div>
-              <div className={styles.Button} onClick={onImportKeypair}>Import Keypair</div>
             </>
         }
 

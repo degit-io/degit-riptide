@@ -8,7 +8,7 @@ import {
   Transaction,
   TransactionInstruction
 } from "@solana/web3.js"
-import {TOKEN_PROGRAM_ID} from "@solana/spl-token"
+import {getAccount, TOKEN_PROGRAM_ID} from "@solana/spl-token"
 import * as borsh from "borsh"
 import {Buffer} from "buffer"
 import {Config} from "../../config"
@@ -142,6 +142,7 @@ export const getDAO = async (req: Request, res: Response) => {
       continue
     }
 
+    repoAccount.total_investment = Number(repoAccount.total_investment) / LAMPORTS_PER_SOL
     foundAccounts.push(repoAccount)
   }
 
@@ -458,4 +459,64 @@ export const postSendSol = async (req: Request, res: Response) => {
   }
 
   res.json({"success": true})
+}
+
+export const getDegBalance = async (req: Request, res: Response) => {
+  const solana: Connection = req.app.get("solana")
+  const publicKey = req.query.publicKey
+  if (!publicKey) {
+    res.status(400).json({"success": false, "error": "Missing public key"})
+    return
+  }
+
+  let amount: bigint
+  try {
+    const tokenAccount = await getAssociatedTokenAddress(
+      Config.TOKEN,
+      new PublicKey(publicKey)
+    )
+    const tokenAmount = await getAccount(
+      solana,
+      tokenAccount
+    )
+    amount = tokenAmount.amount
+  } catch (e) {
+    res.json({"success": true, "balance": 0})
+    return
+  }
+
+  const balance = Number(amount) / LAMPORTS_PER_SOL
+  res.json({"success": true, "balance": balance})
+}
+
+export const getInvestedByOthers = async (req: Request, res: Response) => {
+  const solana: Connection = req.app.get("solana")
+  const owner = req.query.owner
+  if (!owner) {
+    res.status(400).json({"success": false, "error": "Missing owner"})
+    return
+  }
+  const programAccounts = await solana.getProgramAccounts(
+    Config.DAO_PROGRAM_ID
+  )
+
+  let investedAmount = 0
+  for (const p of programAccounts) {
+    let investAccount: InvestAccount
+    try {
+      investAccount = await borsh.deserialize(
+        InvestAccountSchema,
+        InvestAccount,
+        p.account.data
+      ) as InvestAccount
+    } catch (e) {
+      continue
+    }
+
+    if (investAccount.repo_owner !== owner || investAccount.account_type !== "investor") {
+      continue
+    }
+    investedAmount += Number(investAccount.invested_amount) / LAMPORTS_PER_SOL
+  }
+  res.json({success: true, amount: investedAmount})
 }

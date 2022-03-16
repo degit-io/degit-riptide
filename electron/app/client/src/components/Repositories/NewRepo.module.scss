@@ -40,11 +40,10 @@
 }
 
 .CreateButton {
-  @apply pt-2 pb-2 pl-4 pr-4 mt-4;
+  @apply px-8 py-2 mt-4;
   @apply text-lg font-bold;
-  @apply bg-yellow-500 text-white rounded-xl;
-  @apply cursor-pointer hover:opacity-75 duration-200;
-  @apply shadow-lg;
+  @apply bg-black text-white rounded-3xl;
+  @apply cursor-pointer hover:opacity-75;
 }
 
 .CloseSnackButton {

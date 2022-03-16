@@ -1,9 +1,10 @@
-import {useContext, useEffect, useState} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import styles from "./Repositories.module.scss"
 import {Link} from "react-router-dom"
 import {AppConfig} from "../../config/Config"
 import repoEmptyImg from "../../assets/repo.empty.png"
 import {AuthContext} from "../../contexts/auth"
+import {SelectProvider} from "../Wallet/SelectProvider"
 
 interface RepoInterface {
   name: string
@@ -20,6 +21,7 @@ export const Repositories = () => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [repos, setRepos] = useState<RepoInterface[]>([])
   const [orbitId, setOrbitId] = useState("")
+  const [openWalletProvider, setOpenWalletProvider] = useState(false)
 
   useEffect(() => {
     if (keypair === undefined) {
@@ -47,8 +49,8 @@ export const Repositories = () => {
   const createNoReposContainer = () => {
     return (
       <div className={styles.NoReposContainer}>
-        <div className={styles.NoReposImg}>
-          <img src={repoEmptyImg} alt="No repository"/>
+        <div className={styles.NoReposTitle}>
+          There is no repository yet...
         </div>
         <Link className={styles.CreateRepoButton}
               to="./create"
@@ -111,11 +113,13 @@ export const Repositories = () => {
   const createNotSignInContainer = () => {
     return (
       <div className={styles.NotSignInContainer}>
-        <div className={styles.NotSignInImg}>
-          <img src={repoEmptyImg} alt="No repository"/>
+        <div className={styles.NotSignInTitle}>
+          Welcome to <br/> DeGit Client
         </div>
-        <div className={styles.NotSignInText}>
-          Create a wallet to start
+        <div className={styles.NotSignInSubTitle}
+             onClick={() => setOpenWalletProvider(true)}
+        >
+          Create Wallet
         </div>
       </div>
     )
@@ -132,6 +136,7 @@ export const Repositories = () => {
               : createRepoListContainer()
           : null
       }
+      <SelectProvider open={openWalletProvider} onClose={() => setOpenWalletProvider(false)}/>
     </div>
   )
 }

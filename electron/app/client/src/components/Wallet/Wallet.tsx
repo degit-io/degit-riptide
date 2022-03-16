@@ -27,14 +27,15 @@ export const Wallet = (props: WalletProps) => {
   } = useContext(AuthContext)
   const {setOpenSnack, setSnackMessage} = useContext(HelperContext)
 
-  const publicKey = keypair?.publicKey.toBase58() || "Error when decoding public key"
-
   const handleClose = () => {
     props.onClose()
   }
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(publicKey)
+    if (keypair === undefined) {
+      return
+    }
+    await navigator.clipboard.writeText(keypair.publicKey.toBase58())
   }
 
   const notifyDeleteDegitDirPublicKey = () => {
@@ -161,18 +162,45 @@ export const Wallet = (props: WalletProps) => {
       )
   }
 
+  const getDegBalance = () => {
+    if (keypair === undefined) {
+      return
+    }
+
+    fetch(`${AppConfig.metaUrl}/solana/deg?publicKey=${keypair.publicKey.toBase58()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      },
+    })
+      .then(res => {
+          if (!res.ok) {
+            res.json().then(data => {
+              setOpenSnack(true)
+              setSnackMessage(`Get balance failed - ${data.error}`)
+            })
+            return
+          }
+          res.json().then(data => {
+            setDegBalance(Math.round(data.balance))
+          })
+        }
+      )
+  }
+
   useEffect(() => {
     if (props.open) {
       if (keypair === undefined) {
         return
       }
-      const getBalance = async () => {
+      const getSolBalance = async () => {
         const connection = new Connection(AppConfig.rpcUrl)
         const balance = await connection.getBalance(keypair!.publicKey)
         const roundedBalance = (balance / LAMPORTS_PER_SOL).toFixed(4)
         setSolBalance(parseFloat(roundedBalance))
       }
-      getBalance().then()
+      getSolBalance().then()
+      getDegBalance()
     }
   }, [props, keypair])
 
@@ -184,7 +212,7 @@ export const Wallet = (props: WalletProps) => {
         <div className={styles.Header}>
           <div className={styles.Wallet}>Wallet</div>
           <div className={styles.PublicKeyRow}>
-            <div className={styles.PublicKey}>{publicKey}</div>
+            <div className={styles.PublicKey}>{keypair ? keypair.publicKey.toBase58() : ""}</div>
             <ContentCopyIcon fontSize="small"
                              className={styles.ContentCopyIcon}
                              onClick={handleCopy}

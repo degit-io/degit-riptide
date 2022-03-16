@@ -1,22 +1,11 @@
 import {app, BrowserWindow} from "electron"
-import {Express} from "express"
 import {Config} from "./config"
 import path from "path"
-import * as IPFS from "ipfs"
-import {initGitServer, initMetaServer} from "./server/start_server"
+import {startServer} from "./server/start_server"
 import {createRootDir} from "./server/utils"
 
 // Electron display window
 let win: BrowserWindow
-
-// Server for running Git commands
-let gitServer: Express = initGitServer()
-
-// Server for showing meta information about repositories
-let metaServer: Express = initMetaServer()
-
-// IPFS server
-let ipfs: IPFS.IPFS
 
 // Initialize the Electron display window
 const createWindow = () => {
@@ -43,11 +32,6 @@ const createWindow = () => {
   )
 }
 
-const startServer = () => {
-  metaServer.listen(Config.META_SERVER_PORT)
-  gitServer.listen(Config.GIT_SERVER_PORT)
-}
-
 app.whenReady().then(() => {
   createWindow()
 
@@ -55,14 +39,14 @@ app.whenReady().then(() => {
   createRootDir()
 
   // Start server
-  startServer()
+  startServer().then()
 
   app.on("activate", () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
-      startServer()
+      startServer().then()
     }
   })
 })
@@ -77,15 +61,3 @@ app.on("window-all-closed", () => {
     app.quit()
   }
 })
-
-/**
- * Below is commented out for reference only, this is used when
- * the React client needs to send a message to the Electron client
- * for doing something requiring node. This may not be necessary
- * since the client mostly interacts with the servers directly.
- */
-// ipcMain.on("onClickConnect", async (event, args) => {
-//   console.log("hey there!!")
-// win.webContents.send("afterClickConnect", "OK")
-// await startIPFSServer()
-// })

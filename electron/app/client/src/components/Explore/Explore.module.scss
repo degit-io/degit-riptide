@@ -9,9 +9,21 @@
 }
 
 .DaoRow {
-  @apply flex flex-col p-4;
+  @apply flex flex-row p-4 items-center;
   @apply border-0 border-b-2 border-gray-200;
   @apply cursor-pointer hover:opacity-75;
+}
+
+.DaoMetaCol {
+  @apply flex flex-col;
+}
+
+.DaoInvestment {
+  @apply ml-auto;
+}
+
+.DaoInvestmentAmount {
+  @apply font-bold text-lg;
 }
 
 .DaoContainer {

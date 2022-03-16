@@ -58,7 +58,7 @@ export const Repository = () => {
         if (res.success) {
           setSnackMessage("Successfully created DAO")
         } else {
-          setSnackMessage("Failed to create DAO")
+          setSnackMessage(`Failed to create DAO - ${res.error}`)
         }
         setIsShowProgressBar(false)
       }).catch(() => {
@@ -134,7 +134,7 @@ export const Repository = () => {
             keypair?.publicKey.toBase58() === publicKey
               ?
               <div className={styles.DAOButton} onClick={onClickMakeDAO}>
-                Make DAO
+                Publish as DAO
               </div>
               :
               <div className={styles.DAOButton} onClick={onClickInvest}>

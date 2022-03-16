@@ -10,13 +10,9 @@ import {dbRouter} from "./routes/db.route"
 import * as IPFS from "ipfs"
 import OrbitDB from "orbit-db"
 import {Connection} from "@solana/web3.js"
-import fs from "fs"
-import path from "path"
-import os from "os"
 
 let ipfs: IPFS.IPFS
 let orbitdb: any
-let profile: any
 let solana: Connection
 
 export const initMetaServer = (): Express => {
@@ -45,12 +41,11 @@ export const initIPFSServer = async (): Promise<IPFS.IPFS> => {
   return await IPFS.create()
 }
 
-// For testing
-const testServer = async () => {
+export const startServer = async () => {
   ipfs = await IPFS.create()
   orbitdb = await OrbitDB.createInstance(ipfs)
   solana = new Connection(
-    "http://localhost:8899",
+    Config.SOLANA_URL,
     "confirmed"
   )
 
@@ -66,4 +61,4 @@ const testServer = async () => {
   gitServer.listen(Config.GIT_SERVER_PORT)
 }
 
-testServer().then()
+// startServer().then()

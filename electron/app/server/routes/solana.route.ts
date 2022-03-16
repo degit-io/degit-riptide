@@ -4,7 +4,9 @@ import {
   postDAO,
   postInvest,
   postAirdrop,
-  postSendSol
+  postSendSol,
+  getDegBalance,
+  getInvestedByOthers
 } from "../controllers/solana.controller"
 
 const router = express.Router({mergeParams: true})
@@ -13,6 +15,8 @@ router.get("/dao", getDAO)
 router.post("/invest", postInvest)
 router.post("/airdrop", postAirdrop)
 router.post("/send_sol", postSendSol)
+router.get("/deg", getDegBalance)
+router.get("/invested_by_others", getInvestedByOthers)
 
 export {
   router as solanaRouter

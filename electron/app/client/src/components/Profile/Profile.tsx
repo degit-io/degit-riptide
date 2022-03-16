@@ -82,14 +82,29 @@ export const Profile = () => {
       .then(res => res.json())
       .then(res => {
         const accounts = res.accounts || []
-        console.log(accounts)
         setOnChainRepoCnt(accounts.length)
+      })
+  }
+
+  const fetchInvestedAmounts = () => {
+    if (keypair === undefined) {
+      return
+    }
+    let url = `${AppConfig.metaUrl}/solana/invested_by_others`
+    url = `${url}?owner=${keypair.publicKey}`
+    fetch(url, {
+      method: "GET",
+    })
+      .then(res => res.json())
+      .then(res => {
+        setTotalInvestment(Math.round(res.amount))
       })
   }
 
   useEffect(() => {
     fetchProfileData()
     fetchOnChainRepo()
+    fetchInvestedAmounts()
   }, [isAuthenticated, keypair])
 
   const createNotSignInContainer = () => {

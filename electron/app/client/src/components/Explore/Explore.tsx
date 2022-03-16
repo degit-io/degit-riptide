@@ -8,6 +8,7 @@ interface Dao {
   repo_name: string
   orbit_id: string
   repo_owner: string
+  total_investment: number
 }
 
 interface DaoResponse {
@@ -53,14 +54,21 @@ export const Explore = () => {
 
   const getDaoRow = () => {
     return daos.map((dao: Dao) => {
-      const linkKey= `${dao.orbit_id}/${dao.repo_owner}/${dao.repo_name}`
+      const linkKey = `${dao.orbit_id}/${dao.repo_owner}/${dao.repo_name}`
       return (
         <Link className={styles.DaoRow}
               to={`/repos/${linkKey}`}
               key={linkKey}
         >
-          <div className={styles.RepoName}>{dao.repo_name}</div>
-          <div className={styles.Owner}>Created By {dao.repo_owner}</div>
+          <div className={styles.DaoMetaCol}>
+            <div className={styles.RepoName}>{dao.repo_name}</div>
+            <div className={styles.Owner}>Created By {dao.repo_owner}</div>
+          </div>
+
+          <div className={styles.DaoInvestment}>
+            <div>Funded By Investors:</div>
+            <div className={styles.DaoInvestmentAmount}>{dao.total_investment} DEG</div>
+          </div>
         </Link>
       )
     })

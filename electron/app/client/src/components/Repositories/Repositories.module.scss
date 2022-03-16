@@ -27,14 +27,14 @@
   @apply h-full;
 }
 
-.NoReposImg {
-  @apply w-64;
+.NoReposTitle {
+  @apply text-6xl font-bold text-center;
 }
 
 .CreateRepoButton {
   @apply pt-4 pb-4 pl-8 pr-8;
-  @apply text-xl font-bold;
-  @apply bg-yellow-500 text-white rounded-full;
+  @apply bg-black text-white font-bold text-xl;
+  @apply rounded-3xl py-2 px-8;
   @apply cursor-pointer hover:opacity-75 duration-200;
   @apply shadow-lg;
 }
@@ -58,7 +58,7 @@
 .NewRepoButton {
   @apply pt-1 pb-1 pl-4 pr-4 ml-auto;
   @apply text-base font-bold;
-  @apply bg-yellow-500 text-white rounded-full;
+  @apply bg-black text-white rounded-full;
   @apply cursor-pointer hover:opacity-75 duration-200;
   @apply shadow-lg;
 }
@@ -72,6 +72,13 @@
   @apply w-64;
 }
 
-.NotSignInText {
-  @apply text-2xl font-bold;
+.NotSignInTitle {
+  @apply text-6xl font-bold text-center;
+  line-height: 100px;
+}
+
+.NotSignInSubTitle {
+  @apply bg-black text-white font-bold text-xl;
+  @apply rounded-3xl py-2 px-8;
+  @apply cursor-pointer;
 }
