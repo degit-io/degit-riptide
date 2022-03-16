@@ -4,18 +4,22 @@
 
 .FileListContainer {
   @apply flex flex-col;
-  @apply pl-4 pr-4 pb-8 pt-2 m-4;
-  @apply border-2 border-gray-100 rounded-2xl;
+  @apply pl-2 pr-2;
+  @apply border-gray-100 rounded-b-xl;
+  border-width: 1px;
+  border-top-width: 0;
 }
 
 .Item {
   flex: 0 0 75px;
   @apply flex flex-row items-center gap-4;
   @apply pl-4 pr-4;
-  @apply border-0 border-b-2 border-gray-50;
+  @apply border-0 border-gray-100;
+  border-bottom-width: 1px;
 }
 
 .FileName {
+  @apply w-48;
 }
 
 .LastModified {
@@ -30,6 +34,26 @@
 .ReadMeContainer {
   @apply p-8 m-4;
   @apply border-2 border-gray-100 rounded-2xl;
+}
+
+.ContentContainer {
+  @apply p-12;
+}
+
+.ContentHeaderRow {
+  @apply flex flex-row;
+  @apply py-2 px-4 mt-4;
+  @apply rounded-t-xl;
+  @apply bg-gray-50;
+}
+
+.LastCommitTime {
+  @apply ml-auto;
+}
+
+.BranchSelector {
+  @apply rounded-3xl text-center;
+  @apply w-32 h-10;
 }
 
 .NoContentContainer {

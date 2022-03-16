@@ -7,6 +7,9 @@ import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutl
 import {getTimeFromNow} from "../../functions/time"
 import {BlobResponse} from "./Blob"
 import ReactMarkdown from "react-markdown"
+import Select from "@mui/material/Select"
+import MenuItem from "@mui/material/MenuItem"
+import FormControl from "@mui/material/FormControl"
 
 interface TreeProps {
   repoId: string
@@ -16,6 +19,7 @@ interface TreeProps {
 
 interface TreeMeta {
   date: string
+  commitMsg: string
   fileName: string
   fileType: string
 }
@@ -23,17 +27,29 @@ interface TreeMeta {
 interface TreeResponse {
   files: TreeMeta[]
   hasReadMe: boolean
+  lastCommitInfo: LastCommit
+  branches: string[]
+}
+
+interface LastCommit {
+  date: string
+  message: string
 }
 
 export const Tree = ({repoId, orbitId, publicKey}: TreeProps) => {
   const params = useParams()
-  const branch = params.branch || "master"
   const dirName = params["*"]
+  const [branch, setBranch] = useState(params.branch || "master")
   const [tree, setTree] = useState<TreeMeta[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasContents, setHasContents] = useState(false)
   const [hasReadMe, setHasReadMe] = useState(false)
   const [readMeBody, setReadMeBody] = useState("")
+  const [lastCommit, setLastCommit] = useState<LastCommit>({
+    date: "",
+    message: "",
+  })
+  const [branches, setBranches] = useState<string[]>([])
 
   useEffect(
     () => {
@@ -48,12 +64,15 @@ export const Tree = ({repoId, orbitId, publicKey}: TreeProps) => {
           if (res.files) {
             setHasContents(true)
           }
+          console.log(res)
           setTree(res.files || [])
+          setLastCommit(res.lastCommitInfo)
+          setBranches(res.branches)
           setHasReadMe(res.hasReadMe || false)
           setIsLoaded(true)
         })
     },
-    [params]
+    [params, branch]
   )
 
   useEffect(
@@ -76,13 +95,16 @@ export const Tree = ({repoId, orbitId, publicKey}: TreeProps) => {
   )
 
   const fileList = () => {
+    // console.log(dirName)
     return tree.map((item) => {
       const fileName = item.fileName
       const fileType = item.fileType
+      const commitMsg = item.commitMsg
       const date = Date.parse(item.date)
       const ago = getTimeFromNow(date)
+      const filePath = dirName ? `${dirName}/${fileName}` : fileName
       return (
-        <Link to={`${fileType}/${branch}/${fileName}`}
+        <Link to={`../${fileType}/${branch}/${filePath}`}
               className={styles.Item}
               key={fileName}
         >
@@ -92,6 +114,10 @@ export const Tree = ({repoId, orbitId, publicKey}: TreeProps) => {
 
           <div className={styles.FileName}>
             {fileName}
+          </div>
+
+          <div className={styles.CommitMessage}>
+            {commitMsg}
           </div>
 
           <div className={styles.LastModified}>
@@ -151,6 +177,45 @@ export const Tree = ({repoId, orbitId, publicKey}: TreeProps) => {
     )
   }
 
+  const getContentsContainer = () => {
+    return (
+      <div className={styles.ContentContainer}>
+        <FormControl>
+          <Select
+            value={branch}
+            displayEmpty
+            className={styles.BranchSelector}
+            onChange={(e) => {
+              setBranch(e.target.value)
+            }}
+          >
+            {
+              branches.map((branch) => {
+                return (
+                  <MenuItem
+                    key={branch}
+                    value={branch}
+                  >
+                    {branch}
+                  </MenuItem>
+                )
+              })
+            }
+          </Select>
+        </FormControl>
+
+        <div className={styles.ContentHeaderRow}>
+          <div>{lastCommit.message}</div>
+          <div className={styles.LastCommitTime}>{getTimeFromNow(Date.parse(lastCommit.date))}</div>
+        </div>
+
+        <div className={styles.FileListContainer}>
+          {fileList()}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.Container}>
       {
@@ -158,11 +223,7 @@ export const Tree = ({repoId, orbitId, publicKey}: TreeProps) => {
           <>
             {
               hasContents
-                ? (
-                  <div className={styles.FileListContainer}>
-                    {fileList()}
-                  </div>
-                )
+                ? getContentsContainer()
                 : noContentContainer()
             }
             {

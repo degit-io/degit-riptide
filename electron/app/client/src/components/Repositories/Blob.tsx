@@ -12,8 +12,14 @@ interface BlobProps {
   publicKey: string
 }
 
+interface CommitInfo {
+  message: string
+  commitHash: string
+}
+
 export interface BlobResponse {
   body: string
+  commitInfo: CommitInfo
 }
 
 export const Blob = ({repoId, orbitId, publicKey}: BlobProps) => {
@@ -21,6 +27,10 @@ export const Blob = ({repoId, orbitId, publicKey}: BlobProps) => {
   const branch = params.branch
   const fileName = params["*"]
   const [body, setBody] = useState<string>("")
+  const [commitInfo, setCommitInfo] = useState<CommitInfo>({
+    message: "",
+    commitHash: ""
+  })
 
   useEffect(
     () => {
@@ -30,6 +40,7 @@ export const Blob = ({repoId, orbitId, publicKey}: BlobProps) => {
         .then(res => res.json())
         .then((res: BlobResponse) => {
           setBody(res.body)
+          setCommitInfo(res.commitInfo)
         })
     },
     [branch, fileName]
@@ -38,9 +49,8 @@ export const Blob = ({repoId, orbitId, publicKey}: BlobProps) => {
   return (
     <div className={styles.Container}>
       <div className={styles.Header}>
-        <div className={styles.PublicKey}>Public Key</div>
-        <div className={styles.CommitMessage}>Commit Message Placeholder</div>
-        <div className={styles.LatestCommit}>Latest commit: 417cfdc</div>
+        <div className={styles.CommitMessage}>{commitInfo.message}</div>
+        <div className={styles.LatestCommit}>Latest commit: {commitInfo.commitHash}</div>
       </div>
 
       <div className={styles.SubHeader}>
