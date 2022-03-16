@@ -7,8 +7,7 @@ import {Link} from "react-router-dom"
 interface Dao {
   repo_name: string
   orbit_id: string
-  owner: string
-  quorum: number
+  repo_owner: string
 }
 
 interface DaoResponse {
@@ -54,14 +53,14 @@ export const Explore = () => {
 
   const getDaoRow = () => {
     return daos.map((dao: Dao) => {
-      const linkKey= `${dao.orbit_id}/${dao.owner}/${dao.repo_name}`
+      const linkKey= `${dao.orbit_id}/${dao.repo_owner}/${dao.repo_name}`
       return (
         <Link className={styles.DaoRow}
               to={`/repos/${linkKey}`}
               key={linkKey}
         >
           <div className={styles.RepoName}>{dao.repo_name}</div>
-          <div className={styles.Owner}>Created By {dao.owner}</div>
+          <div className={styles.Owner}>Created By {dao.repo_owner}</div>
         </Link>
       )
     })

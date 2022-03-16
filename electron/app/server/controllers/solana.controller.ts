@@ -13,18 +13,21 @@ import * as borsh from "borsh"
 import {Buffer} from "buffer"
 import {Config} from "../../config"
 import {getOrCreateAssociatedTokenAccount, getAssociatedTokenAddress} from "@solana/spl-token"
+import {createHash} from "crypto"
 
 class RepoAccount {
-  quorum: number
-  owner: string
-  orbit_id: string
+  account_type: string
+  repo_owner: string
   repo_name: string
+  orbit_id: string
+  total_investment: number
 
   constructor(args: any) {
-    this.quorum = args.quorum
-    this.owner = args.owner
-    this.orbit_id = args.orbit_id
+    this.account_type = args.account_type
+    this.repo_owner = args.repo_owner
     this.repo_name = args.repo_name
+    this.orbit_id = args.orbit_id
+    this.total_investment = args.total_investment
   }
 }
 
@@ -34,22 +37,31 @@ const RepoAccountSchema = new Map([
     {
       kind: "struct",
       fields: [
-        ["quorum", "u8"],
-        ["owner", "string"],
+        ["account_type", "string"],
+        ["repo_owner", "string"],
+        ["repo_name", "string"],
         ["orbit_id", "string"],
-        ["repo_name", "string"]
+        ["total_investment", "u64"],
       ]
     }
   ],
 ])
 
 class InvestAccount {
-  amount: number
-  git_ref: string
+  account_type: string
+  repo_owner: string
+  repo_name: string
+  orbit_id: string
+  investor: string
+  invested_amount: number
 
   constructor(args: any) {
-    this.amount = args.amount
-    this.git_ref = args.git_ref
+    this.account_type = args.account_type
+    this.repo_owner = args.repo_owner
+    this.repo_name = args.repo_name
+    this.orbit_id = args.orbit_id
+    this.investor = args.investor
+    this.invested_amount = args.invested_amount
   }
 }
 
@@ -59,8 +71,12 @@ const InvestAccountSchema = new Map([
     {
       kind: "struct",
       fields: [
-        ["amount", "u64"],
-        ["git_ref", "string"]
+        ["account_type", "string"],
+        ["repo_owner", "string"],
+        ["repo_name", "string"],
+        ["orbit_id", "string"],
+        ["investor", "string"],
+        ["invested_amount", "u64"],
       ]
     }
   ],
@@ -122,7 +138,7 @@ export const getDAO = async (req: Request, res: Response) => {
       continue
     }
 
-    if (owner && repoAccount.owner !== owner) {
+    if (owner && repoAccount.repo_owner !== owner) {
       continue
     }
 
@@ -138,14 +154,12 @@ export const postDAO = async (req: Request, res: Response) => {
   let keypair: Keypair
   let repoName: string
   let orbitId: string
-  let quorum: number
   try {
     solana = req.app.get("solana")
     const privateKey: Uint8Array = Uint8Array.from(req.body.privateKey)
     keypair = Keypair.fromSecretKey(privateKey)
     repoName = req.body.repoName
     orbitId = req.body.orbitId
-    quorum = req.body.quorum || 0
   } catch (e) {
     res.status(400).json({
       "success": false,
@@ -155,25 +169,29 @@ export const postDAO = async (req: Request, res: Response) => {
   }
 
   // Generate a public key for the program-owned account
-  let programAccountPublicKey: PublicKey
+  let daoAccountPublicKey: PublicKey
   try {
-    programAccountPublicKey = await PublicKey.createWithSeed(
+    daoAccountPublicKey = await PublicKey.createWithSeed(
       keypair.publicKey,
       repoName,
       Config.DAO_PROGRAM_ID
     )
   } catch (e) {
-    res.status(500).json({"success": false, "error": e.message})
+    res.status(500).json({
+      "success": false,
+      "error": e.message
+    })
     return
   }
 
   // Get minimum rent
   const data = new RepoAccount(
     {
-      quorum: quorum,
-      owner: keypair.publicKey.toBase58(),
+      account_type: "dao",
+      repo_owner: keypair.publicKey.toBase58(),
       repo_name: repoName,
       orbit_id: orbitId,
+      total_investment: 0
     }
   )
   const serialized = await borsh.serialize(
@@ -186,10 +204,18 @@ export const postDAO = async (req: Request, res: Response) => {
   try {
     accountExists = await checkIfAccountExists(
       solana,
-      programAccountPublicKey
+      daoAccountPublicKey
     )
   } catch (e) {
     res.status(500).json({"success": false, "error": e.message})
+    return
+  }
+
+  if (accountExists) {
+    res.status(400).json({
+      "success": false,
+      "error": "DAO already exists"
+    })
     return
   }
 
@@ -216,7 +242,7 @@ export const postDAO = async (req: Request, res: Response) => {
     {
       keys: [
         {pubkey: keypair.publicKey, isSigner: true, isWritable: false},
-        {pubkey: programAccountPublicKey, isSigner: false, isWritable: true}
+        {pubkey: daoAccountPublicKey, isSigner: false, isWritable: true}
       ],
       programId: Config.DAO_PROGRAM_ID,
       data: Buffer.from(serialized)
@@ -245,15 +271,35 @@ export const postInvest = async (req: Request, res: Response) => {
   const privateKey: Uint8Array = Uint8Array.from(req.body.privateKey)
   const keypair = Keypair.fromSecretKey(privateKey)
   const repo: string = req.body.repoName
+  const orbitId: string = req.body.orbitId
+  const publicKey: string = req.body.publicKey
   const amount: number = Number(req.body.amount)
 
-  // Derive program account public key
-  let programAccountPublicKey: PublicKey
+  // Derive DAO program account public key
+  let daoAccountPublicKey: PublicKey
   try {
-    programAccountPublicKey = await PublicKey.createWithSeed(
-      keypair.publicKey,
+    daoAccountPublicKey = await PublicKey.createWithSeed(
+      new PublicKey(publicKey),
       repo,
-      Config.INVEST_PROGRAM_ID
+      Config.DAO_PROGRAM_ID
+    )
+  } catch (e) {
+    res.status(500).send({"success": false, "error": e})
+    return
+  }
+
+  // Derive investor program account public key
+  let investorAccountPublicKey: PublicKey
+  let investorAccountSeed: string
+  try {
+    investorAccountSeed = createHash("sha256")
+      .update(`${keypair.publicKey.toBase58()}-${repo}`)
+      .digest("hex")
+      .substring(0, 32)
+    investorAccountPublicKey = await PublicKey.createWithSeed(
+      keypair.publicKey,
+      investorAccountSeed,
+      Config.DAO_PROGRAM_ID
     )
   } catch (e) {
     res.status(500).send({"success": false, "error": e})
@@ -265,7 +311,7 @@ export const postInvest = async (req: Request, res: Response) => {
   try {
     exist = await checkIfAccountExists(
       solana,
-      programAccountPublicKey
+      investorAccountPublicKey
     )
   } catch (e) {
     res.status(500).send({"success": false, "error": e})
@@ -277,8 +323,12 @@ export const postInvest = async (req: Request, res: Response) => {
   // If program account doesn't exist, create one
   const data = new InvestAccount(
     {
-      amount: amount,
-      git_ref: repo
+      account_type: "investor",
+      orbit_id: orbitId,
+      repo_name: repo,
+      repo_owner: publicKey,
+      invested_amount: amount,
+      investor: keypair.publicKey.toBase58()
     }
   )
   const serialized = await borsh.serialize(
@@ -292,12 +342,12 @@ export const postInvest = async (req: Request, res: Response) => {
       createAccountInstruction = await getCreateAccountInstruction(
         solana,
         serialized.length,
-        Config.INVEST_PROGRAM_ID,
+        Config.DAO_PROGRAM_ID,
         keypair.publicKey,
-        repo
+        investorAccountSeed
       )
     } catch (e) {
-      res.status(500).send({"success": false, "error": e})
+      res.status(500).json({success: false, error: e.message})
       return
     }
 
@@ -313,29 +363,35 @@ export const postInvest = async (req: Request, res: Response) => {
   )
   const toTokenAccountAddress = await getAssociatedTokenAddress(
     Config.TOKEN,
-    Config.INVEST_PROGRAM_ID
+    Config.TOKEN_ACCOUNT
   )
 
-  const transferInstruction = new TransactionInstruction(
+  const investInstruction = new TransactionInstruction(
     {
       keys: [
-        {pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false},
+        {pubkey: keypair.publicKey, isSigner: true, isWritable: true},
+        {pubkey: daoAccountPublicKey, isSigner: false, isWritable: true},
+        {pubkey: investorAccountPublicKey, isSigner: false, isWritable: true},
         {pubkey: fromTokenAccount.address, isSigner: false, isWritable: true},
         {pubkey: toTokenAccountAddress, isSigner: false, isWritable: true},
-        {pubkey: programAccountPublicKey, isSigner: false, isWritable: true},
-        {pubkey: keypair.publicKey, isSigner: true, isWritable: true}
+        {pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false},
       ],
-      programId: Config.INVEST_PROGRAM_ID,
+      programId: Config.DAO_PROGRAM_ID,
       data: Buffer.from(serialized)
     }
   )
-  transaction.add(transferInstruction)
+  transaction.add(investInstruction)
 
-  await sendAndConfirmTransaction(
-    solana,
-    transaction,
-    [keypair]
-  )
+  try {
+    await sendAndConfirmTransaction(
+      solana,
+      transaction,
+      [keypair]
+    )
+  } catch (e) {
+    res.status(500).json({"success": false, "error": e.message})
+    return
+  }
 
   res.json({"success": true})
 }

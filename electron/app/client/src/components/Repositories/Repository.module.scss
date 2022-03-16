@@ -45,8 +45,8 @@
 }
 
 .DAOButton {
-  @apply ml-auto p-2;
-  @apply bg-yellow-400;
+  @apply ml-auto py-2 px-4;
+  @apply bg-black text-white font-bold text-base;
   @apply rounded-full shadow-md cursor-pointer hover:opacity-75 duration-200;
 }
 
@@ -68,4 +68,24 @@
 
 .ActiveOption {
   @apply border-yellow-400;
+}
+
+.PromptInvestContainer {
+  @apply flex flex-col justify-start items-start;
+  @apply p-4;
+}
+
+.PromptInvestInput {
+  @apply w-64 mt-2;
+  @apply pl-2 pr-2;
+  @apply border-2 border-black rounded-md;
+  &:focus {
+    outline: none;
+  }
+}
+
+.PromptInvestConfirm {
+  @apply bg-black text-white font-bold text-center text-sm;
+  @apply py-2 px-4 rounded-3xl mt-4;
+  @apply cursor-pointer;
 }

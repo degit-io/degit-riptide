@@ -10,12 +10,15 @@ import React, {useContext} from "react"
 import {AppConfig} from "../../config/Config"
 import {AuthContext} from "../../contexts/auth"
 import {HelperContext} from "../../contexts/Helper.context"
+import {Dialog} from "@mui/material"
 
 export const Repository = () => {
   const {orbitId, publicKey, repoId} = useParams()
   const location = useLocation()
   const {keypair} = useContext(AuthContext)
   const {setOpenSnack, setSnackMessage, setIsShowProgressBar} = useContext(HelperContext)
+  const [promptInvestAmount, setPromptInvestAmount] = React.useState(false)
+  const [investAmount, setInvestAmount] = React.useState("")
 
   if (!repoId || !publicKey || !orbitId) {
     return (
@@ -26,13 +29,7 @@ export const Repository = () => {
   const isOnProposals = location.pathname.endsWith("proposals")
   const proposalsClass = isOnProposals ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
 
-  const isOnIssues = location.pathname.endsWith("issues")
-  const issuesClass = isOnIssues ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
-
-  const isOnSettings = location.pathname.endsWith("settings")
-  const settingsClass = isOnSettings ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
-
-  const isOnContents = !isOnProposals && !isOnIssues && !isOnSettings
+  const isOnContents = !isOnProposals
   const contentsClass = isOnContents ? `${styles.Option} ${styles.ActiveOption}` : styles.Option
 
   const onClickMakeDAO = () => {
@@ -71,6 +68,53 @@ export const Repository = () => {
     })
   }
 
+  const confirmInvest = () => {
+    if (keypair === undefined) {
+      setOpenSnack(true)
+      setSnackMessage("You need to have a wallet to invest")
+      return
+    }
+    const amount = Number(investAmount)
+    if (isNaN(amount) || amount <= 0) {
+      setOpenSnack(true)
+      setSnackMessage("Invalid amount")
+      return
+    }
+
+    fetch(`${AppConfig.metaUrl}/solana/invest`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          privateKey: Array.from(keypair.secretKey),
+          repoName: repoId,
+          orbitId,
+          amount,
+          publicKey
+        }),
+      }
+    ).then(res => {
+      if (res.ok) {
+        setOpenSnack(true)
+        setSnackMessage("Successfully invested")
+      } else {
+        setOpenSnack(true)
+        setSnackMessage("Failed to invest")
+      }
+      setPromptInvestAmount(false)
+    })
+  }
+
+  const onClickInvest = () => {
+    if (keypair === undefined) {
+      setOpenSnack(true)
+      setSnackMessage("You need to have a wallet to invest")
+      return
+    }
+    setPromptInvestAmount(true)
+  }
+
   return (
     <div className={styles.Container}>
       <div className={styles.Header}>
@@ -93,12 +137,10 @@ export const Repository = () => {
                 Make DAO
               </div>
               :
-              null
+              <div className={styles.DAOButton} onClick={onClickInvest}>
+                Invest
+              </div>
           }
-          <div className={styles.StatusColumn}>
-            <div className={styles.StatusKey}>STAR</div>
-            <div className={styles.StatusValue}>0</div>
-          </div>
         </div>
 
       </div>
@@ -107,14 +149,8 @@ export const Repository = () => {
         <Link className={contentsClass} to={"./"}>
           CONTENTS
         </Link>
-        <Link className={issuesClass} to={"issues"}>
-          ISSUES
-        </Link>
         <Link className={proposalsClass} to={"proposals"}>
           PROPOSALS
-        </Link>
-        <Link className={settingsClass} to={"settings"}>
-          SETTINGS
         </Link>
       </div>
 
@@ -126,6 +162,19 @@ export const Repository = () => {
         <Route path="/blob/:branch/*" element={<Blob repoId={repoId} orbitId={orbitId} publicKey={publicKey}/>}/>
         <Route path="/tree/:branch/*" element={<Tree repoId={repoId} orbitId={orbitId} publicKey={publicKey}/>}/>
       </Routes>
+
+      <Dialog open={promptInvestAmount}
+              onClose={() => setPromptInvestAmount(false)}
+      >
+        <div className={styles.PromptInvestContainer}>
+          <div>Investment Amount (DEG)</div>
+          <input className={styles.PromptInvestInput}
+                 onChange={(e: any) => setInvestAmount(e.target.value)}/>
+          <div className={styles.PromptInvestConfirm}
+               onClick={confirmInvest}>CONFIRM
+          </div>
+        </div>
+      </Dialog>
     </div>
   )
 }
